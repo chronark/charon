@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package geocoding;
+
+service Geocoding {
+	rpc Forward(Search) returns (ForwardResponse) {}
+	rpc Reverse(Coordinates) returns (ReverseResponse) {}
+}
+
+message Search {
+	string query = 1;
+}
+
+
+message Coordinates {
+	float lat = 1;
+	float lon = 2;
+}
+
+message ForwardResponse {
+	bytes payload = 1;
+}
+
+
+message ReverseResponse {
+	bytes payload = 1;
+}
+

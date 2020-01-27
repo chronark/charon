@@ -1,0 +1,13 @@
+.env
+
+.terraform/
+
+terraform
+terraform.tfstate
+terraform.tfstate.backup
+tfplan
+versions.tf
+
+logs/
+.vscode/
+volumes/

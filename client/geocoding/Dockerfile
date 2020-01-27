@@ -1,0 +1,20 @@
+FROM golang:1.13 as client_builder
+
+WORKDIR /build
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+COPY . .
+
+ENV GOOS linux
+ENV GOARCH amd64
+ENV CGO_ENABLED 0
+RUN go build -o client .
+
+FROM alpine:3.11
+
+WORKDIR /
+COPY --from=client_builder /build/client .
+
+CMD ["./client"]

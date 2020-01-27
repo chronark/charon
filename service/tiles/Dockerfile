@@ -1,0 +1,33 @@
+FROM golang:1.13 as service_builder
+
+WORKDIR /tiles
+
+RUN go mod init github.com/chronark/charon/service/tiles
+RUN go mod download
+
+COPY . .
+ENV GOOS linux
+ENV GOARCH amd64
+ENV CGO_ENABLED 0
+RUN go build -o tiles-service .
+
+
+FROM golang:1.13 as util_builder
+
+WORKDIR /
+RUN git clone https://github.com/chronark/waitfor.git
+WORKDIR /waitfor
+
+RUN go mod download
+ENV GOOS linux
+ENV GOARCH amd64
+ENV CGO_ENABLED 0
+RUN go build -o waitfor .
+
+FROM alpine:3.11
+
+WORKDIR /
+COPY --from=service_builder /tiles/tiles-service .
+COPY --from=util_builder /waitfor/waitfor .
+
+CMD ["./tiles-service"]

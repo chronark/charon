@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package tiles; 
+
+service Tiles {
+  rpc Get(Request) returns (Response) {}
+}
+
+
+message Request {
+  int32 X = 1;
+  int32 Y = 2;
+  int32 Z = 3;
+}
+
+message Response {
+  bytes File = 2;
+}

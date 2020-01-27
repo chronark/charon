@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package filecache; 
+
+service FilecacheService {
+
+  rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Set(SetRequest) returns (SetResponse) {}
+  rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+}
+
+message File {
+  string Name = 1;
+  bytes Data = 2;
+}
+
+message GetRequest {
+  string HashKey = 1;
+}
+
+message GetResponse {
+  bool Hit = 1;
+  bytes File = 2;
+}
+
+message SetRequest {
+  string HashKey = 1;
+  bytes File = 2;
+}
+
+message SetResponse {
+  bool Created = 1;
+}
+
+message DeleteRequest {
+  string HashKey = 1;
+}
+
+message DeleteResponse {
+  bool Deleted = 1;
+}
