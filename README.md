@@ -24,28 +24,27 @@ sudo sh get-docker.sh
 
 There are a couple of steps to run the services.
 
-0. Build all necessary docker images if you don't have them alrady.
+- 0. Build all necessary docker images if you don't have them alrady.
 ```sh
 make build
 ```
 
-1. Get and initialize Terraform, a infrastructure management and provisioning tool.
+- 1. Get and initialize Terraform, a infrastructure management and provisioning tool.
 ```sh
 make init
 ```
 
-2. Create a terraform plan
+- 2. Create a terraform plan
 ```
 make plan
 ```
 
-3. Apply the plan
+- 3. Apply the plan
 ```
 make apply
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
-
+The API gateway will be listening on port 52000.
 
 ## Services
 ![Architecture](https://github.com/chronark/charon/blob/master/architecture.jpeg?raw=true)

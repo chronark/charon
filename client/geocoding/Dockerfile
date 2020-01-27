@@ -2,8 +2,7 @@ FROM golang:1.13 as client_builder
 
 WORKDIR /build
 
-COPY go.mod .
-COPY go.sum .
+RUN go mod init github.com/chronark/charon/client/geocoding
 RUN go mod download
 COPY . .
 
