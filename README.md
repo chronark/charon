@@ -25,25 +25,32 @@ sudo sh get-docker.sh
 
 There are a couple of steps to run the services.
 
-0. Build all necessary docker images if you don't have them alrady.
+0. Clone the repository to your machine.
+
+    ```sh
+    git clone https://github.com/chronark/charon.git
+    cd charon
+    ```
+
+1. Build all necessary docker images if you don't have them alrady.
 
     ```sh
     make build
     ```
 
-1. Get and initialize Terraform, a infrastructure management and provisioning tool.
+2. Get and initialize Terraform, a infrastructure management and provisioning tool.
 
     ```sh
     make init
     ```
 
-2. Create a terraform plan
+3. Create a terraform plan
 
     ```sh
     make plan
     ```
 
-3. Apply the plan
+4. Apply the plan
 
     ```sh
     make apply
