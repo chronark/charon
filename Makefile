@@ -1,7 +1,7 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build: fmt
+build:
 	docker build -t chronark/charon-service-filecache ./service/filecache
 	docker build -t chronark/charon-service-gateway ./service/gateway
 	docker build -t chronark/charon-service-geocoding ./service/geocoding

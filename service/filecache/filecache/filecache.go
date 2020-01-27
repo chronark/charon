@@ -2,7 +2,7 @@ package filecache
 
 import (
 	"fmt"
-	"github.com/chronark/charon/pkg/logging"
+	"github.com/chronark/charon/service/filecache/logging"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"

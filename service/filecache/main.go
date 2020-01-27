@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chronark/charon/pkg/logging"
+	"github.com/chronark/charon/service/filecache/logging"
 	"github.com/chronark/charon/service/filecache/filecache"
 	proto "github.com/chronark/charon/service/filecache/proto/filecache"
 	micro "github.com/micro/go-micro"
