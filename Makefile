@@ -51,11 +51,12 @@ plan:
 apply:
 	./terraform apply "tfplan" || echo "If you are missing docker images, please run 'make build' and try again."
 
-prune:
+purge:
 	./terraform destroy -auto-approve ||true
 	@docker rm -f $$(docker ps -aq) || true 
 	@docker image rm -f $$(docker image ls -aq) || true
 	@docker volume rm -f $$(docker volume ls -q) || true
+	rm ./terraform ||true
 
 
 
