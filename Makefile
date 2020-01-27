@@ -2,10 +2,10 @@ export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
 build:
-	docker build -t chronark/charon-service-filecache ./service/filecache
-	docker build -t chronark/charon-service-gateway ./service/gateway
-	docker build -t chronark/charon-service-geocoding ./service/geocoding
-	docker build -t chronark/charon-service-tiles ./service/tiles
+	docker build -t chronark/charon-service-filecache -f ./service/filecache/Dockerfile .
+	docker build -t chronark/charon-service-gateway -f ./service/gateway/Dockerfile .
+	docker build -t chronark/charon-service-geocoding -f ./service/geocoding/Dockerfile .
+	docker build -t chronark/charon-service-tiles -f ./service/tiles/Dockerfile .
 	docker build -t chronark/charon-client-geocoding ./client/geocoding
 	docker build -t chronark/charon-client-tiles ./client/tiles
 	docker build -t chronark/atlas ./service/map/

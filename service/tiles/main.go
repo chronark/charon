@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chronark/charon/pkg/logging"
+	"github.com/chronark/charon/service/tiles/logging"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 	micro "github.com/micro/go-micro"
 	"github.com/sirupsen/logrus"
