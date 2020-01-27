@@ -47,7 +47,7 @@ make apply
 The API gateway will be listening on port 52000.
 
 ## Services
-![Architecture](./architecture.pdf)
+![Architecture](./architecture.png)
 
 ### Filecache
 Discovery name: `charon.srv.filecache`
