@@ -5,5 +5,5 @@ import (
 )
 
 type GeocodingHandler interface {
-	Forward( http.ResponseWriter, r *http.Request) 
+	Forward(w http.ResponseWriter, r *http.Request)
 }

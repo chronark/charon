@@ -2,8 +2,7 @@ FROM golang:1.13 as service_builder
 
 WORKDIR /build
 
-COPY go.mod .
-COPY go.sum .
+RUN go mod init github.com/chronark/charon/service/filecache
 RUN go mod download
 
 COPY . .

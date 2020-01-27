@@ -1,4 +1,4 @@
-FROM node:latest AS builder
+FROM node:13 AS builder
 
 WORKDIR /
 RUN git clone https://github.com/chronark/atlas.git

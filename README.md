@@ -1,8 +1,8 @@
 # Charon
+[![CodeFactor](https://www.codefactor.io/repository/github/chronark/charon/badge)](https://www.codefactor.io/repository/github/chronark/charon)
+
 Backend services for caching and displaying geospatial data
 
-
-[![CodeFactor](https://www.codefactor.io/repository/github/chronark/charon/badge)](https://www.codefactor.io/repository/github/chronark/charon)
 
 
 ## Getting Started
