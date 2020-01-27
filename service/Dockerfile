@@ -32,6 +32,5 @@ ARG SERVICE
 WORKDIR /
 COPY --from=service_builder /${SERVICE} .
 COPY --from=util_builder /waitfor/waitfor .
-
-CMD [${SERVICE}]
+CMD [./${SERVICE}]
 

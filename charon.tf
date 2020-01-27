@@ -1,6 +1,8 @@
 provider "docker" {
 }
 
+
+
 ###########################
 #         Networks
 ###########################
@@ -47,7 +49,7 @@ resource "docker_image" "atlas" {
 resource "docker_container" "gateway" {
   name    = "charon.service.gateway"
   image   = docker_image.gateway.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./gateway-service"]
+  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./gateway"]
   env     = ["SERVICE_ADDRESS=0.0.0.0:52000"]
   ports {
     internal = 52000
@@ -61,12 +63,12 @@ resource "docker_container" "gateway" {
 resource "docker_container" "filecache" {
   name    = "charon.service.filecache"
   image   = docker_image.filecache.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./filecache-service"]
+  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./filecache"]
   networks_advanced {
     name = docker_network.private_network.name
   }
   volumes {
-    host_path      = "/home/andreas/Desktop/code/go/charon/volumes/filecache"
+    host_path      = "${path.cwd}/volumes/filecache"
     container_path = "/cache"
   }
 }
@@ -74,7 +76,7 @@ resource "docker_container" "filecache" {
 resource "docker_container" "tiles" {
   name    = "charon.service.tiles"
   image   = docker_image.tiles.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./tiles-service"]
+  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./tiles"]
   env     = ["TILE_PROVIDER=osm"]
   networks_advanced {
     name = docker_network.private_network.name
@@ -84,7 +86,7 @@ resource "docker_container" "tiles" {
 resource "docker_container" "nominatim" {
   name    = "charon.service.geocoding.nominatim"
   image   = docker_image.geocoding.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./geocoding-service"]
+  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./geocoding"]
   env = [
     "GEOCODING_PROVIDER=nominatim",
     "DATASTORE_HOST=mongodb:27017",
@@ -109,7 +111,7 @@ resource "docker_container" "syslog" {
     name = docker_network.private_network.name
   }
   volumes {
-    host_path      = "/home/andreas/Desktop/code/go/charon/volumes/syslog"
+    host_path      = "${path.cwd}/volumes/syslog"
     container_path = "/var/log/syslog"
   }
 }
@@ -117,27 +119,27 @@ resource "docker_container" "syslog" {
 
 
 
-resource "docker_container" "geocodingclient" {
-  name  = "charon.client.geocoding"
-  image = "chronark/charon-client-geocoding"
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
-}
+# resource "docker_container" "geocodingclient" {
+#   name  = "charon.client.geocoding"
+#   image = "chronark/charon-client-geocoding"
+#   networks_advanced {
+#     name = docker_network.private_network.name
+#   }
+# }
 
-resource "docker_container" "tilesclient" {
-  name  = "charon.client.tiles"
-  image = "chronark/charon-client-tiles"
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
-}
+# resource "docker_container" "tilesclient" {
+#   name  = "charon.client.tiles"
+#   image = "chronark/charon-client-tiles"
+#   networks_advanced {
+#     name = docker_network.private_network.name
+#   }
+# }
 
 resource "docker_container" "atlas" {
   name  = "atlas"
   image = docker_image.atlas.latest
   ports {
-    internal = 80
+    internal = 5000
     external = 80
   }
 }
