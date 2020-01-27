@@ -33,7 +33,7 @@ build:
 
 	@docker build -t chronark/charon-client-geocoding ./client/geocoding
 	@docker build -t chronark/charon-client-tiles ./client/tiles
-	@docker build -t chronark/atlas ./service/map/
+	@docker build -t chronark/atlas https://github.com/chronark/atlas.git
 
 fmt:
 	./terraform fmt
