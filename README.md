@@ -8,11 +8,12 @@ Backend services for caching and displaying geospatial data
 
 These instructions will get you a copy of the project up and running on your system. This is intended to run on an ubuntu machine but can be run anywhere you have docker installed.
 
-### Prerequisites
+### Dependencies
 
 - Make
 - Docker
 
+Make is most likely already installed on your system.
 To install docker follow the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/) or use the install script:
 
 ```sh
