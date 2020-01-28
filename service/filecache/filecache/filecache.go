@@ -2,7 +2,7 @@ package filecache
 
 import (
 	"fmt"
-	"github.com/chronark/charon/service/filecache/logging"
+	"github.com/chronark/charon/pkg/logging"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -80,7 +80,7 @@ func (fc *FileCache) Set(hashKey string, value []byte) error {
 	}
 	err = file.Close()
 	if err == nil {
-		logrus.Infof("Stored %s", hashKey)
+		fc.logger.Infof("Stored %s", hashKey)
 	}
 	return err
 

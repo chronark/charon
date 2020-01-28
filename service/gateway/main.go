@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/chronark/charon/pkg/logging"
 	"github.com/chronark/charon/service/gateway/handler/nominatim"
 	"github.com/chronark/charon/service/gateway/handler/osm"
-	"github.com/chronark/charon/service/gateway/logging"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chronark/charon/service/geocoding/logging"
+	"github.com/chronark/charon/pkg/logging"
 	"github.com/chronark/charon/service/geocoding/handler"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/micro/go-micro"
