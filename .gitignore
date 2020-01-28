@@ -11,3 +11,6 @@ versions.tf
 logs/
 .vscode/
 volumes/
+
+.vagrant/
+*console.log
