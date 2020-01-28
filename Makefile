@@ -1,41 +1,44 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build: build-filecache build-gateway build-geocoding build-tiles build-clients
-	docker build -t chronark/rsyslog ./service/rsyslog
+build: build-filecache build-gateway build-geocoding build-tiles build-clients build-rsyslog build-map
+
+build-map:
 	docker build -t chronark/atlas https://github.com/chronark/atlas.git
+build-rsyslog:
+	docker build -t chronark/rsyslog ./service/rsyslog
 
 build-filecache:
-	@docker build \
+	docker build \
 	-t chronark/charon-service-filecache \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=filecache \
 	.
 
 build-gateway:
-	@docker build \
+	docker build \
 	-t chronark/charon-service-gateway \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=gateway \
 	.
 
 build-geocoding:
-	@docker build \
+	docker build \
 	-t chronark/charon-service-geocoding \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=geocoding \
 	.
 
 build-tiles:
-	@docker build \
+	docker build \
 	-t chronark/charon-service-tiles \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=tiles \
 	.
 
 build-clients:
-	@docker build -t chronark/charon-client-geocoding ./client/geocoding
-	@docker build -t chronark/charon-client-tiles ./client/tiles
+	docker build -t chronark/charon-client-geocoding ./client/geocoding
+	docker build -t chronark/charon-client-tiles ./client/tiles
 	
 	
 fmt:
@@ -56,9 +59,9 @@ apply:
 
 purge:
 	./terraform destroy -auto-approve ||true
-	@docker rm -f $$(docker ps -aq) || true 
-	@docker image rm -f $$(docker image ls -aq) || true
-	@docker volume rm -f $$(docker volume ls -q) || true
+	docker rm -f $$(docker ps -aq) || true 
+	docker image rm -f $$(docker image ls -aq) || true
+	docker volume rm -f $$(docker volume ls -q) || true
 	rm ./terraform ||true
 
 
