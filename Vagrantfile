@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.cpus = "4"
-    vb.memory = "8192"
+    vb.memory = "12288"
  end
 
  config.vm.provision "shell", inline: <<-SHELL

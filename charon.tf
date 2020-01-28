@@ -49,7 +49,7 @@ resource "docker_image" "atlas" {
 resource "docker_container" "gateway" {
   name    = "charon.service.gateway"
   image   = docker_image.gateway.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./gateway"]
+  command = ["./gateway"]
   env     = ["SERVICE_ADDRESS=0.0.0.0:52000"]
   ports {
     internal = 52000
@@ -63,7 +63,7 @@ resource "docker_container" "gateway" {
 resource "docker_container" "filecache" {
   name    = "charon.service.filecache"
   image   = docker_image.filecache.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./filecache"]
+  command = ["./filecache"]
   networks_advanced {
     name = docker_network.private_network.name
   }
@@ -76,7 +76,7 @@ resource "docker_container" "filecache" {
 resource "docker_container" "tiles" {
   name    = "charon.service.tiles"
   image   = docker_image.tiles.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./tiles"]
+  command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
   networks_advanced {
     name = docker_network.private_network.name
@@ -86,7 +86,7 @@ resource "docker_container" "tiles" {
 resource "docker_container" "nominatim" {
   name    = "charon.service.geocoding.nominatim"
   image   = docker_image.geocoding.latest
-  command = ["sh", "-c", "./waitfor syslog:601 -t=50 && ./geocoding"]
+  command = ["./geocoding"]
   env = [
     "GEOCODING_PROVIDER=nominatim",
     "DATASTORE_HOST=mongodb:27017",
@@ -95,9 +95,12 @@ resource "docker_container" "nominatim" {
     name = docker_network.private_network.name
   }
 }
-resource "docker_container" "syslog" {
-  name  = "syslog"
-  image = "balabit/syslog-ng:latest"
+resource "docker_container" "rsyslog" {
+  name  = "rsyslog"
+  image = "chronark/rsyslog"
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
   ports {
     internal = 514
     external = 514
@@ -107,17 +110,26 @@ resource "docker_container" "syslog" {
     internal = 601
     external = 601
   }
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
   volumes {
     host_path      = "${path.cwd}/volumes/syslog"
-    container_path = "/var/log/syslog"
+    container_path = "/var/log/rsyslog/"
   }
 }
 
 
 
+resource "docker_container" "logspout" {
+  name  = "logspout"
+  image = "gliderlabs/logspout"
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
+  volumes {
+    host_path      = "/var/run/docker.sock"
+    container_path = "/var/run/docker.sock"
+  }
+  command = ["syslog+udp://rsyslog:514"]
+}
 
 # resource "docker_container" "geocodingclient" {
 #   name  = "charon.client.geocoding"

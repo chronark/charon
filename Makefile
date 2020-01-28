@@ -2,6 +2,9 @@ export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
 build: build-filecache build-gateway build-geocoding build-tiles build-clients build-map
+	docker build -t chronark/rsyslog ./service/rsyslog
+
+
 build-filecache:
 	@docker build \
 	-t chronark/charon-service-filecache \
