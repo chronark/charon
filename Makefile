@@ -1,9 +1,9 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build: build-filecache build-gateway build-geocoding build-tiles build-clients build-map
+build: build-filecache build-gateway build-geocoding build-tiles build-clients
 	docker build -t chronark/rsyslog ./service/rsyslog
-
+	docker build -t chronark/atlas https://github.com/chronark/atlas.git
 
 build-filecache:
 	@docker build \
@@ -36,8 +36,7 @@ build-tiles:
 build-clients:
 	@docker build -t chronark/charon-client-geocoding ./client/geocoding
 	@docker build -t chronark/charon-client-tiles ./client/tiles
-build-map:
-	@docker build -t chronark/atlas https://github.com/chronark/atlas.git
+	
 	
 fmt:
 	./terraform fmt
