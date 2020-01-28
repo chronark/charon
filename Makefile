@@ -1,39 +1,39 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build:
-	# filecache
+build: build-filecache build-gateway build-geocoding build-tiles build-clients build-map
+build-filecache:
 	@docker build \
 	-t chronark/charon-service-filecache \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=filecache \
 	.
 
-	# gateway
+build-gateway:
 	@docker build \
 	-t chronark/charon-service-gateway \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=gateway \
 	.
 
-	# geocoding
+build-geocoding:
 	@docker build \
 	-t chronark/charon-service-geocoding \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=geocoding \
 	.
 
-	# tiles
+build-tiles:
 	@docker build \
 	-t chronark/charon-service-tiles \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=tiles \
 	.
 
-
+build-clients:
 	@docker build -t chronark/charon-client-geocoding ./client/geocoding
 	@docker build -t chronark/charon-client-tiles ./client/tiles
-
+build-map:
 	@docker build -t chronark/atlas https://github.com/chronark/atlas.git
 	
 fmt:
