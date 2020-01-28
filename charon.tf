@@ -11,6 +11,10 @@ resource "docker_network" "private_network" {
   name     = "internal_network"
   internal = false
 }
+resource "docker_network" "logging" {
+  name     = "logging"
+  internal = true
+}
 
 ##########################
 #         Images
@@ -95,41 +99,43 @@ resource "docker_container" "nominatim" {
     name = docker_network.private_network.name
   }
 }
+
 resource "docker_container" "rsyslog" {
   name  = "rsyslog"
   image = "chronark/rsyslog"
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.logging.name
+  }
+  volumes {
+    host_path      = "${path.cwd}/volumes/syslog"
+    container_path = "/var/logs"
+
   }
   ports {
     internal = 514
     external = 514
     protocol = "udp"
   }
-  ports {
-    internal = 601
-    external = 601
-  }
-  volumes {
-    host_path      = "${path.cwd}/volumes/syslog"
-    container_path = "/var/log/rsyslog/"
-  }
+
 }
-
-
 
 resource "docker_container" "logspout" {
   name  = "logspout"
   image = "gliderlabs/logspout"
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.logging.name
   }
   volumes {
     host_path      = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
   }
-  command = ["syslog+udp://rsyslog:514"]
+  command = ["udp://rsyslog:514"]
 }
+
+
+
+
+
 
 # resource "docker_container" "geocodingclient" {
 #   name  = "charon.client.geocoding"
