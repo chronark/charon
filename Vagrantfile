@@ -22,10 +22,10 @@ Vagrant.configure("2") do |config|
      usermod -aG docker vagrant
 
 
-    #  cd charon
-    #  make build
-    #  make init
-    #  make plan
-    #  make apply
+     cd /vagrant
+     make build -j
+     make init
+     make plan
+     make apply
    SHELL
 end
