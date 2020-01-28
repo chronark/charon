@@ -10,8 +10,9 @@ These instructions will get you a copy of the project up and running on your sys
 
 ### Dependencies
 
-- Make
-- Docker
+- make
+- unzip (to unzip terraform)
+- docker
 
 Make is most likely already installed on your system.
 To install docker follow the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/) or use the install script:
