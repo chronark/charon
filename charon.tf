@@ -53,6 +53,8 @@ resource "docker_image" "atlas" {
 resource "docker_container" "gateway" {
   name    = "charon.service.gateway"
   image   = docker_image.gateway.latest
+  restart = "on-failure"
+
   command = ["./gateway"]
   env     = ["SERVICE_ADDRESS=0.0.0.0:52000"]
   ports {
@@ -62,11 +64,14 @@ resource "docker_container" "gateway" {
   networks_advanced {
     name = docker_network.private_network.name
   }
+  
 }
 
 resource "docker_container" "filecache" {
   name    = "charon.service.filecache"
   image   = docker_image.filecache.latest
+  restart = "on-failure"
+
   command = ["./filecache"]
   networks_advanced {
     name = docker_network.private_network.name
@@ -80,6 +85,8 @@ resource "docker_container" "filecache" {
 resource "docker_container" "tiles" {
   name    = "charon.service.tiles"
   image   = docker_image.tiles.latest
+  restart = "on-failure"
+
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
   networks_advanced {
@@ -90,6 +97,8 @@ resource "docker_container" "tiles" {
 resource "docker_container" "nominatim" {
   name    = "charon.service.geocoding.nominatim"
   image   = docker_image.geocoding.latest
+  restart = "on-failure"
+
   command = ["./geocoding"]
   env = [
     "GEOCODING_PROVIDER=nominatim",
@@ -103,6 +112,8 @@ resource "docker_container" "nominatim" {
 resource "docker_container" "rsyslog" {
   name  = "rsyslog"
   image = "chronark/rsyslog"
+  restart = "on-failure"
+
   networks_advanced {
     name = docker_network.logging.name
   }
@@ -122,6 +133,7 @@ resource "docker_container" "rsyslog" {
 resource "docker_container" "logspout" {
   name  = "logspout"
   image = "gliderlabs/logspout"
+  restart = "on-failure"
   networks_advanced {
     name = docker_network.logging.name
   }
