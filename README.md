@@ -103,6 +103,12 @@ They both receive a tile request and search the cache. In case of a miss they wi
 
 ## Development
 
+To get up and running as fast as possible you can use Vagrant to start and provision a local ubuntu:18.04 machine
+
+```sh
+vagrant up
+```
+
 Charon makes use of protobuf for the internal communication. In order to compile the protobuf definition you need to install:
 
 ```sh
