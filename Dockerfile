@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM alpine:3.11
 
 RUN  apk add --update rsyslog \
   && rm -rf /var/cache/apk/*
