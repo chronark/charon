@@ -63,9 +63,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "image/png")
 	w.Write(rsp.GetFile())
-	w.WriteHeader(http.StatusOK)
 	return
 
 }
