@@ -6,7 +6,7 @@ import (
 	"github.com/chronark/charon/service/gateway/handler/osm"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
-
+	"net/http"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/web"
 	"github.com/sirupsen/logrus"
@@ -26,6 +26,14 @@ func init() {
 	}
 }
 
+func corsWrapper(h http.Handler) http.Handler{
+	return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "localhost")
+		w.Header().Set("Access-Control-Allow-Methods", "GET")
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	service := web.NewService(
 		web.Name(serviceName),
@@ -42,10 +50,10 @@ func main() {
 		Client: tiles.NewTilesService("charon.srv.tiles.osm", client.DefaultClient),
 	}
 
-	service.HandleFunc("/geocoding/forward/", nominatimHandler.Forward)
-	service.HandleFunc("/geocoding/reverse/", nominatimHandler.Reverse)
+	service.Handle("/geocoding/forward/", corsWrapper(http.HandlerFunc(nominatimHandler.Forward)))
+	service.Handle("/geocoding/reverse/", corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)))
 
-	service.HandleFunc("/tiles/", osmHandler.Get)
+	service.Handle("/tiles/", corsWrapper(http.HandlerFunc(osmHandler.Get)))
 
 	if err := service.Init(); err != nil {
 		log.Fatal(err)
