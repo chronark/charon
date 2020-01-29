@@ -68,6 +68,7 @@ The API gateway will be listening on port 52000.
 Discovery name: `charon.srv.filecache`
 
 Filecache is a basic cache that writes or reads bytes to and from the disk.
+The cache is mounted on the host as `./volumes/filecache` and can be backed up or modified by removing or adding files on the host machine.
 
 ### Gateway
 
@@ -85,6 +86,7 @@ Discovery name: `charon.srv.geocoding.nominatim` or `charon.srv.geocoding.mapbox
 
 Geocoding has two handlers:  [Nominatim](https://nominatim.org/) and [Mapbox](https://www.mapbox.com/)
 They both receive a forward or reverse geocoding search and search the cache. In case of a miss they will query their respective 3rd party APIs, write to cache and return the result.
+The cache is mounted on the host as `./volumes/geocoding` and can be backed up or modified by removing or adding files on the host machine.
 
 ### Tiles
 
