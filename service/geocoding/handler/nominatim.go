@@ -63,9 +63,8 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 		res.Payload = filecacheGetResponse.File
 	} else {
 		h.Logger.Debugf("Cache miss: %s", hashKey)
-		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=jsonv2", "polygon_geojson=1"}
+		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=jsonv2", "polygon_geojson=1", "limit=1"}
 		url := "https://nominatim.openstreetmap.org/search?" + strings.Join(parameters, "&")
-		h.Logger.Warn(url)
 		geojson, err := h.request(url)
 		if err != nil {
 			return fmt.Errorf("Could not request response from nominatim: %w", err)
