@@ -62,7 +62,9 @@ purge:
 	docker rm -f $$(docker ps -aq) || true 
 	docker image rm -f $$(docker image ls -aq) || true
 	docker volume rm -f $$(docker volume ls -q) || true
+	docker network prune -f
 	rm ./terraform ||true
+	rm -rf ./volumes
 
 
 
