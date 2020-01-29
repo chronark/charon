@@ -51,7 +51,7 @@ func (h *Nominatim) request(url string) ([]byte, error) {
 func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geocoding.ForwardResponse) error {
 	h.Logger.Infof("Search: %s", req.Query)
 
-	hashKey := filepath.Join("nominatim", "forward", req.Query)
+	hashKey := filepath.Join("nominatim", "forward", req.Query + ".json")
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
 	filecacheGetResponse, err := fileCacheClient.Get(context.TODO(), &filecache.GetRequest{HashKey: hashKey})
@@ -82,29 +82,29 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res *geocoding.ReverseResponse) error {
 	h.Logger.Infof("Search: lat %f, lon %f", req.Lat, req.Lon)
 
-	hashKey := filepath.Join("nominatim", "reverse", fmt.Sprintf("%f-%f", req.Lat, req.Lon))
+	hashKey := filepath.Join("nominatim", "reverse", fmt.Sprintf("%f.%f", req.Lat, req.Lon) + ".json")
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
 	filecacheGetResponse, err := fileCacheClient.Get(context.TODO(), &filecache.GetRequest{HashKey: hashKey})
 	if err != nil {
 		h.Logger.Errorf("Could not get file from filecache: %v\n", err)
 	}
-	var geojson []byte
 	if filecacheGetResponse.GetHit() {
-		geojson = filecacheGetResponse.File
+		res.Payload = filecacheGetResponse.File
 	} else {
-		parameters := []string{"format=geojson", "polygon_geojson=1", "limit=1", fmt.Sprintf("lon=%f", req.GetLon()), fmt.Sprintf("lat=%f", req.GetLat())}
+		parameters := []string{"format=geojson", "polygon_geojson=1","zoom=3", "limit=1", fmt.Sprintf("lon=%f", req.GetLon()), fmt.Sprintf("lat=%f", req.GetLat())}
 		url := "https://nominatim.openstreetmap.org/reverse?" + strings.Join(parameters, "&")
 
 		geojson, err := h.request(url)
 		if err != nil {
 			return fmt.Errorf("Could not request response from nominatim: %w", err)
 		}
-
+		
 		fileCacheClient.Set(context.TODO(), &filecache.SetRequest{HashKey: hashKey, File: geojson})
+		h.Logger.Infof("Payload: %v", geojson[:100])
+		res.Payload = geojson
 	}
 
-	res.Payload = geojson
 	return nil
 
 }
