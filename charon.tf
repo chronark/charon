@@ -169,7 +169,7 @@ resource "docker_container" "atlas" {
   name  = "atlas"
   image = docker_image.atlas.latest
   ports {
-    internal = 5000
+    internal = 80
     external = 80
   }
 }
