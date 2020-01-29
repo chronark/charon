@@ -78,7 +78,7 @@ Routes:
 
 - `/geocoding/forward?query=XYZ` calls the geocoding service.
 - `/geocoding/reverse?lat=1.0&lon=1.0` calls the geocoding service.
-- `/tiles?x=0&y=0&z=0`calls the tiles service.
+- `/tile?x=0&y=0&z=0`calls the tiles service.
 
 ### Geocoding
 

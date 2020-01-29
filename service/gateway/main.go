@@ -53,7 +53,7 @@ func main() {
 	service.Handle("/geocoding/forward/", corsWrapper(http.HandlerFunc(nominatimHandler.Forward)))
 	service.Handle("/geocoding/reverse/", corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)))
 
-	service.Handle("/tiles/", corsWrapper(http.HandlerFunc(osmHandler.Get)))
+	service.Handle("/tile/", corsWrapper(http.HandlerFunc(osmHandler.Get)))
 
 	if err := service.Init(); err != nil {
 		log.Fatal(err)
