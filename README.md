@@ -57,7 +57,7 @@ There are a couple of steps to run the services.
     make apply
     ```
 
-The API gateway will be listening on port 52000.
+Visit `http://localhost` to see the map.
 
 ## Services
 
