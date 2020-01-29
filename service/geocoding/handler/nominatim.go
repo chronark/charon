@@ -100,9 +100,8 @@ func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res
 			return fmt.Errorf("Could not request response from nominatim: %w", err)
 		}
 		
-		fileCacheClient.Set(context.TODO(), &filecache.SetRequest{HashKey: hashKey, File: geojson})
-		h.Logger.Infof("Payload: %v", geojson[:100])
 		res.Payload = geojson
+		go fileCacheClient.Set(context.TODO(), &filecache.SetRequest{HashKey: hashKey, File: geojson})
 	}
 
 	return nil
