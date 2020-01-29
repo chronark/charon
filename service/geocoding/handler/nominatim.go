@@ -58,10 +58,9 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 	if err != nil {
 		h.Logger.Errorf("Could not get file from filecache: %v\n", err)
 	}
-	var geojson []byte
 	if filecacheGetResponse.GetHit() {
 		h.Logger.Debugf("Cache hit: %s", hashKey)
-		geojson = filecacheGetResponse.File
+		res.Payload = filecacheGetResponse.File
 	} else {
 		h.Logger.Debugf("Cache miss: %s", hashKey)
 		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=jsonv2", "polygon_geojson=1"}
@@ -71,11 +70,11 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 		if err != nil {
 			return fmt.Errorf("Could not request response from nominatim: %w", err)
 		}
+		res.Payload = geojson
 		h.Logger.Debugf("Writing %s to cache", hashKey)
-		fileCacheClient.Set(context.TODO(), &filecache.SetRequest{HashKey: hashKey, File: geojson})
+		go fileCacheClient.Set(context.TODO(), &filecache.SetRequest{HashKey: hashKey, File: geojson})
 	}
 
-	res.Payload = geojson
 	return nil
 }
 
