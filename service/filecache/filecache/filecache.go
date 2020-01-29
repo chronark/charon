@@ -67,22 +67,23 @@ func (fc *FileCache) Set(hashKey string, value []byte) error {
 	destPath := filepath.Join(fc.Basepath, hashKey)
 	err := os.MkdirAll(filepath.Dir(destPath), os.ModePerm)
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not create directory for the destination: %w", err)
 	}
 	file, err := os.Create(destPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not create file: %w", err)
 	}
 	_, err = file.Write(value)
 	if err != nil {
 		file.Close()
-		return err
+		return fmt.Errorf("Could not write to file: %w", err)
 	}
 	err = file.Close()
-	if err == nil {
-		fc.logger.Infof("Stored %s", hashKey)
+	if err != nil {
+		return fmt.Errorf("Could not close file: %w", err)
 	}
-	return err
+	fc.logger.Infof("Stored %s", hashKey)
+	return nil
 
 }
 func (fc *FileCache) Delete(hashKey string) error {
