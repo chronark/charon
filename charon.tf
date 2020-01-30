@@ -64,7 +64,7 @@ resource "docker_container" "gateway" {
   networks_advanced {
     name = docker_network.private_network.name
   }
-  
+
 }
 
 resource "docker_container" "filecache" {
@@ -110,8 +110,8 @@ resource "docker_container" "nominatim" {
 }
 
 resource "docker_container" "rsyslog" {
-  name  = "rsyslog"
-  image = "chronark/rsyslog"
+  name    = "rsyslog"
+  image   = "chronark/rsyslog"
   restart = "on-failure"
 
   networks_advanced {
@@ -131,8 +131,8 @@ resource "docker_container" "rsyslog" {
 }
 
 resource "docker_container" "logspout" {
-  name  = "logspout"
-  image = "gliderlabs/logspout"
+  name    = "logspout"
+  image   = "gliderlabs/logspout"
   restart = "on-failure"
   networks_advanced {
     name = docker_network.logging.name
