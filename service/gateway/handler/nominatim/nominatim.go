@@ -9,7 +9,7 @@ import (
 )
 
 type Handler struct {
-	Logger *logrus.Logger
+	Logger *logrus.Entry
 	Client geocoding.GeocodingService
 }
 
@@ -27,7 +27,7 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(rsp.GetPayload())
 	return
 
@@ -68,7 +68,7 @@ func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(rsp.GetPayload())
 	return
 

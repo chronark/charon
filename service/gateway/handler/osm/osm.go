@@ -46,7 +46,7 @@ func parseCoordinates(r *http.Request) (*tiles.Request, error) {
 }
 
 type Handler struct {
-	Logger *logrus.Logger
+	Logger *logrus.Entry
 	Client tiles.TilesService
 }
 

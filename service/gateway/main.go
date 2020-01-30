@@ -6,17 +6,17 @@ import (
 	"github.com/chronark/charon/service/gateway/handler/osm"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
-	"net/http"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/web"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 )
 
 const serviceName = "charon.service.gateway"
 
 var serviceAddress string
-var log *logrus.Logger
+var log *logrus.Entry
 
 func init() {
 	serviceAddress = os.Getenv("SERVICE_ADDRESS")
@@ -26,8 +26,8 @@ func init() {
 	}
 }
 
-func corsWrapper(h http.Handler) http.Handler{
-	return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+func corsWrapper(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		//w.Header().Set("Access-Control-Allow-Methods", "GET")
 		h.ServeHTTP(w, r)

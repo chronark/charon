@@ -4,13 +4,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(appName string) *logrus.Logger {
+func New(serviceName string) *logrus.Entry {
 	logger := logrus.New()
 	logger.SetLevel(logrus.DebugLevel)
-	// hook, err := lSyslog.NewSyslogHook("udp", "syslog:514", syslog.LOG_INFO, "")
-	// if err != nil {
-	// 	logger.Fatal(err)
-	// }
-	// logger.Hooks.Add(hook)
-	return logger
+	logger.SetReportCaller(true)
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	contextLogger := logger.WithFields(logrus.Fields{
+		"service": serviceName,
+	})
+	return contextLogger
 }

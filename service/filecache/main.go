@@ -10,7 +10,7 @@ import (
 
 var serviceName = "charon.srv.filecache"
 
-var log *logrus.Logger
+var log *logrus.Entry
 
 func init() {
 	log = logging.New(serviceName)

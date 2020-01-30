@@ -18,7 +18,7 @@ const (
 var (
 	serviceName       = "charon.srv.geocoding"
 	geocodingProvider string
-	logger            *logrus.Logger
+	logger            *logrus.Entry
 )
 
 func init() {

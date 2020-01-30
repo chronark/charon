@@ -20,7 +20,7 @@ type Cache interface {
 type FileCache struct {
 	Basepath string
 	mutex    *sync.Mutex
-	logger   *logrus.Logger
+	logger   *logrus.Entry
 }
 
 // New creates a new filecache instance. Items will be saved in the given path.

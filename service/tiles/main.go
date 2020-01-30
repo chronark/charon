@@ -13,7 +13,7 @@ const providerError = "You must set the environment variable 'TILE_PROVIDER' wit
 var serviceName = "charon.srv.tiles"
 var tileProvider string
 
-var log *logrus.Logger
+var log *logrus.Entry
 
 func init() {
 	tileProvider = os.Getenv("TILE_PROVIDER")

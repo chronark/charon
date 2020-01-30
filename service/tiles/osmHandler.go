@@ -13,7 +13,7 @@ import (
 
 type osmHandler struct {
 	Client client.Client
-	Logger *logrus.Logger
+	Logger *logrus.Entry
 }
 
 func (h *osmHandler) Get(ctx context.Context, req *tiles.Request, res *tiles.Response) error {

@@ -15,7 +15,7 @@ import (
 )
 
 type Nominatim struct {
-	Logger   *logrus.Logger
+	Logger   *logrus.Entry
 	Throttle <-chan time.Time
 	Client   client.Client
 }
@@ -51,7 +51,7 @@ func (h *Nominatim) request(url string) ([]byte, error) {
 func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geocoding.ForwardResponse) error {
 	h.Logger.Infof("Search: %s", req.Query)
 
-	hashKey := filepath.Join("nominatim", "forward", req.Query + ".json")
+	hashKey := filepath.Join("nominatim", "forward", req.Query+".json")
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
 	filecacheGetResponse, err := fileCacheClient.Get(context.TODO(), &filecache.GetRequest{HashKey: hashKey})
@@ -63,7 +63,7 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 		res.Payload = filecacheGetResponse.File
 	} else {
 		h.Logger.Debugf("Cache miss: %s", hashKey)
-		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=jsonv2", "polygon_geojson=1", "limit=1"}
+		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=geojson", "polygon_geojson=1", "limit=1"}
 		url := "https://nominatim.openstreetmap.org/search?" + strings.Join(parameters, "&")
 		geojson, err := h.request(url)
 		if err != nil {
@@ -80,7 +80,7 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res *geocoding.ReverseResponse) error {
 	h.Logger.Infof("Search: lat %f, lon %f", req.Lat, req.Lon)
 
-	hashKey := filepath.Join("nominatim", "reverse", fmt.Sprintf("%f.%f", req.Lat, req.Lon) + ".json")
+	hashKey := filepath.Join("nominatim", "reverse", fmt.Sprintf("%f.%f", req.Lat, req.Lon)+".json")
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
 	filecacheGetResponse, err := fileCacheClient.Get(context.TODO(), &filecache.GetRequest{HashKey: hashKey})
@@ -90,14 +90,14 @@ func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res
 	if filecacheGetResponse.GetHit() {
 		res.Payload = filecacheGetResponse.File
 	} else {
-		parameters := []string{"format=geojson", "polygon_geojson=1","zoom=3", "limit=1", fmt.Sprintf("lon=%f", req.GetLon()), fmt.Sprintf("lat=%f", req.GetLat())}
+		parameters := []string{"format=geojson", "polygon_geojson=1", "zoom=3", "limit=1", fmt.Sprintf("lon=%f", req.GetLon()), fmt.Sprintf("lat=%f", req.GetLat())}
 		url := "https://nominatim.openstreetmap.org/reverse?" + strings.Join(parameters, "&")
 
 		geojson, err := h.request(url)
 		if err != nil {
 			return fmt.Errorf("Could not request response from nominatim: %w", err)
 		}
-		
+
 		res.Payload = geojson
 		go fileCacheClient.Set(context.TODO(), &filecache.SetRequest{HashKey: hashKey, File: geojson})
 	}
