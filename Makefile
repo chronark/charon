@@ -1,7 +1,7 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build: build-filecache build-gateway build-geocoding build-tiles build-clients build-rsyslog build-map
+build: build-filecache build-gateway build-geocoding build-tiles build-rsyslog build-map
 
 build-map:
 	docker build -t chronark/atlas https://github.com/chronark/atlas.git
@@ -67,13 +67,22 @@ purge:
 	rm -rf ./volumes
 
 
-
+netdata:
+	docker run -d --name=netdata \
+	-p 19999:19999 \
+	-v /proc:/host/proc:ro \
+	-v /sys:/host/sys:ro \
+	-v /var/run/docker.sock:/var/run/docker.sock:ro \
+	--cap-add SYS_PTRACE \
+	--security-opt apparmor=unconfined \
+	netdata/netdata
 get-terraform:
 	curl -o terraform.zip https://releases.hashicorp.com/terraform/0.12.19/terraform_0.12.19_linux_amd64.zip
 	unzip -o terraform.zip
 	rm terraform.zip
 
 proto:
+	go get github.com/micro/protoc-gen-micro/v2
 	export PATH
 	protoc \
 		--micro_out=. \

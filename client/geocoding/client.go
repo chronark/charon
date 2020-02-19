@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	micro "github.com/micro/go-micro"
+	micro "github.com/micro/go-micro/v2"
 )
 
 func main() {

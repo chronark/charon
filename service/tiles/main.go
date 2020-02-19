@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/chronark/charon/pkg/logging"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
-	micro "github.com/micro/go-micro"
+	micro "github.com/micro/go-micro/v2"
 	"github.com/sirupsen/logrus"
 	"os"
 )
