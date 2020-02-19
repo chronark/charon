@@ -101,7 +101,7 @@ They both receive a tile request and search the cache. In case of a miss they wi
 - [docker](https://www.docker.com/)
 - [gRPC](https://grpc.io/) - Internal communication
 - [terraform](https://www.terraform.io/) - Infrastructure management
-- [go-micro](https://github.com/micro/go-micro) - Microservice framework
+- [go-micro](https://github.com/micro/go-micro/v2/v2) - Microservice framework
 
 ## Development
 

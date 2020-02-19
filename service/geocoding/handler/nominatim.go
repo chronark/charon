@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/chronark/charon/service/filecache/proto/filecache"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
-	"github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/v2/client"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"

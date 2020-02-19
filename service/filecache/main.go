@@ -4,7 +4,7 @@ import (
 	"github.com/chronark/charon/pkg/logging"
 	"github.com/chronark/charon/service/filecache/filecache"
 	proto "github.com/chronark/charon/service/filecache/proto/filecache"
-	micro "github.com/micro/go-micro"
+	micro "github.com/micro/go-micro/v2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,6 +30,10 @@ func main() {
 	)
 	service.Init()
 
+
+
+
+	
 	err = proto.RegisterFilecacheServiceHandler(
 		service.Server(),
 		&handler{cache},

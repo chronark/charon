@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	proto "github.com/chronark/charon/service/tiles/proto/tiles"
-	micro "github.com/micro/go-micro"
+	micro "github.com/micro/go-micro/v2"
 	"log"
 	"math"
 	"math/rand"
