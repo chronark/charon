@@ -51,12 +51,12 @@ init:
 	[ ! -f ./terraform ] && make get-terraform || true
 	./terraform init
 
-plan:
+plan: init
 	./terraform plan -out tfplan
 
-apply:
-	./terraform apply "tfplan" || echo "If you are missing docker images, please run 'make build' and try again."
-
+apply: plan
+	./terraform apply "tfplan"
+	
 purge:
 	./terraform destroy -auto-approve ||true
 	docker rm -f $$(docker ps -aq) || true 
@@ -76,6 +76,7 @@ netdata:
 	--cap-add SYS_PTRACE \
 	--security-opt apparmor=unconfined \
 	netdata/netdata
+
 get-terraform:
 	curl -o terraform.zip https://releases.hashicorp.com/terraform/0.12.19/terraform_0.12.19_linux_amd64.zip
 	unzip -o terraform.zip
