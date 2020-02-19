@@ -2,20 +2,6 @@ provider "docker" {
 }
 
 
-
-###########################
-#         Networks
-###########################
-
-resource "docker_network" "private_network" {
-  name     = "internal_network"
-  internal = false
-}
-resource "docker_network" "logging" {
-  name     = "logging"
-  internal = true
-}
-
 ##########################
 #         Images
 ###########################
@@ -61,9 +47,7 @@ resource "docker_container" "gateway" {
     internal = 52000
     external = 52000
   }
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
+
 
 }
 
@@ -73,9 +57,7 @@ resource "docker_container" "filecache" {
   restart = "on-failure"
 
   command = ["./filecache"]
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
+
   volumes {
     host_path      = "${path.cwd}/volumes/filecache"
     container_path = "/cache"
@@ -89,9 +71,7 @@ resource "docker_container" "tiles" {
 
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
+
 }
 
 resource "docker_container" "nominatim" {
@@ -104,9 +84,7 @@ resource "docker_container" "nominatim" {
     "GEOCODING_PROVIDER=nominatim",
     "DATASTORE_HOST=mongodb:27017",
   ]
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
+
 }
 
 resource "docker_container" "rsyslog" {
@@ -114,9 +92,7 @@ resource "docker_container" "rsyslog" {
   image   = "chronark/rsyslog"
   restart = "on-failure"
 
-  networks_advanced {
-    name = docker_network.logging.name
-  }
+
   volumes {
     host_path      = "${path.cwd}/volumes/syslog"
     container_path = "/var/logs"
@@ -134,9 +110,7 @@ resource "docker_container" "logspout" {
   name    = "logspout"
   image   = "gliderlabs/logspout"
   restart = "on-failure"
-  networks_advanced {
-    name = docker_network.logging.name
-  }
+
   volumes {
     host_path      = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
@@ -148,22 +122,6 @@ resource "docker_container" "logspout" {
 
 
 
-
-# resource "docker_container" "geocodingclient" {
-#   name  = "charon.client.geocoding"
-#   image = "chronark/charon-client-geocoding"
-#   networks_advanced {
-#     name = docker_network.private_network.name
-#   }
-# }
-
-# resource "docker_container" "tilesclient" {
-#   name  = "charon.client.tiles"
-#   image = "chronark/charon-client-tiles"
-#   networks_advanced {
-#     name = docker_network.private_network.name
-#   }
-# }
 
 resource "docker_container" "atlas" {
   name  = "atlas"
@@ -194,36 +152,21 @@ resource "docker_container" "portainer" {
 resource "docker_container" "jaeger" {
   name  = "jaeger"
   image = "jaegertracing/all-in-one:latest"
-  env   = ["COLLECTOR_ZIPKIN_HTTP_PORT=9411"]
   ports {
-    internal = 5775
-    external = 5775
-    protocol = "udp"
-  }
-  ports {
+    // accept jaeger.thrift in compact Thrift protocol used by most current Jaeger clients
     internal = 6831
     external = 6831
     protocol = "udp"
   }
   ports {
-    internal = 6832
-    external = 6832
-    protocol = "udp"
-  }
-  ports {
-    internal = 5778
-    external = 5778
-  }
-  ports {
+    // UI
     internal = 16686
     external = 16686
-    ports {
-      internal = 14268
-      external = 14268
-    }
-    ports {
-      internal = 9411
-      external = 9411
-    }
   }
+  ports {
+    // Healthcheck at / and metrics at /metrics
+    internal = 14268
+    external = 14268
+  }
+
 }
