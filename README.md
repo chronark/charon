@@ -1,6 +1,7 @@
 # Charon
 
 [![CodeFactor](https://www.codefactor.io/repository/github/chronark/charon/badge)](https://www.codefactor.io/repository/github/chronark/charon)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fchronark%2Fcharon.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fchronark%2Fcharon?ref=badge_shield)
 
 Backend services for caching and displaying geospatial data
 
@@ -120,3 +121,6 @@ go get github.com/micro/protoc-gen-micro
 ```
 
 Then run `make proto` to compile all protobuf definitions at once.
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fchronark%2Fcharon.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fchronark%2Fcharon?ref=badge_large)
