@@ -30,10 +30,6 @@ func main() {
 	)
 	service.Init()
 
-
-
-
-	
 	err = proto.RegisterFilecacheServiceHandler(
 		service.Server(),
 		&handler{cache},
