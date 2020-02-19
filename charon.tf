@@ -191,3 +191,39 @@ resource "docker_container" "portainer" {
   }
 }
 
+resource "docker_container" "jaeger" {
+  name  = "jaeger"
+  image = "jaegertracing/all-in-one:latest"
+  env   = ["COLLECTOR_ZIPKIN_HTTP_PORT=9411"]
+  ports {
+    internal = 5775
+    external = 5775
+    protocol = "udp"
+  }
+  ports {
+    internal = 6831
+    external = 6831
+    protocol = "udp"
+  }
+  ports {
+    internal = 6832
+    external = 6832
+    protocol = "udp"
+  }
+  ports {
+    internal = 5778
+    external = 5778
+  }
+  ports {
+    internal = 16686
+    external = 16686
+    ports {
+      internal = 14268
+      external = 14268
+    }
+    ports {
+      internal = 9411
+      external = 9411
+    }
+  }
+}
