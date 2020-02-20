@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
+	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
@@ -51,6 +52,13 @@ type Handler struct {
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+
+	parent := opentracing.GlobalTracer().StartSpan("hello")
+	defer parent.Finish()
+	child := opentracing.GlobalTracer().StartSpan(
+		"world", opentracing.ChildOf(parent.Context()))
+	defer child.Finish()
+
 	h.Logger.Infof("User %s has requested %s", r.RemoteAddr, r.URL)
 
 	req, err := parseCoordinates(r)

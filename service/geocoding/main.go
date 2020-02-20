@@ -4,12 +4,9 @@ import (
 	"github.com/chronark/charon/pkg/logging"
 	"github.com/chronark/charon/service/geocoding/handler"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
-	"github.com/chronark/charon/service/geocoding/tracer"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/client"
-	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/sirupsen/logrus"
-
 	"os"
 	"time"
 )
@@ -32,19 +29,15 @@ func init() {
 	logger = logging.New(serviceName)
 
 }
+
 func main() {
-	jaeger, closer, err := tracer.NewTracer(serviceName)
-	if err != nil {
-		logger.Error("Could not initialize jaeger: " + err.Error())
-	}
-	defer closer.Close()
 
 	// New Service
 	service := micro.NewService(
 		micro.Name(serviceName),
 		micro.Version("latest"),
-		micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(jaeger)),
-		micro.WrapClient(opentracingWrapper.NewClientWrapper(jaeger)),
+		//micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(jaeger)),
+		//micro.WrapClient(opentracingWrapper.NewClientWrapper(jaeger)),
 	)
 
 	// Initialise service
@@ -55,7 +48,7 @@ func main() {
 
 	switch geocodingProvider {
 	case "nominatim":
-		srvHandler = &handler.Nominatim{Tracer: jaeger, Logger: logger, Throttle: time.Tick(time.Second), Client: client.DefaultClient}
+		srvHandler = &handler.Nominatim{Logger: logger, Throttle: time.Tick(time.Second), Client: client.DefaultClient}
 		break
 	default:
 		logger.Error(geocodingProviderNotFoundError)

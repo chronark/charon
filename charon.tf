@@ -39,7 +39,7 @@ resource "docker_image" "atlas" {
 resource "docker_container" "gateway" {
   name    = "charon.service.gateway"
   image   = docker_image.gateway.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./gateway"]
   env     = ["SERVICE_ADDRESS=0.0.0.0:52000"]
@@ -54,7 +54,7 @@ resource "docker_container" "gateway" {
 resource "docker_container" "filecache" {
   name    = "charon.service.filecache"
   image   = docker_image.filecache.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./filecache"]
 
@@ -67,7 +67,7 @@ resource "docker_container" "filecache" {
 resource "docker_container" "tiles" {
   name    = "charon.service.tiles"
   image   = docker_image.tiles.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
@@ -77,20 +77,18 @@ resource "docker_container" "tiles" {
 resource "docker_container" "nominatim" {
   name    = "charon.service.geocoding.nominatim"
   image   = docker_image.geocoding.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./geocoding"]
   env = [
     "GEOCODING_PROVIDER=nominatim",
-    "DATASTORE_HOST=mongodb:27017",
   ]
-
 }
 
 resource "docker_container" "rsyslog" {
   name    = "rsyslog"
   image   = "chronark/rsyslog"
-  restart = "on-failure"
+  restart = "always"
 
 
   volumes {
@@ -109,7 +107,7 @@ resource "docker_container" "rsyslog" {
 resource "docker_container" "logspout" {
   name    = "logspout"
   image   = "gliderlabs/logspout"
-  restart = "on-failure"
+  restart = "always"
 
   volumes {
     host_path      = "/var/run/docker.sock"
@@ -122,7 +120,6 @@ resource "docker_container" "logspout" {
 
 
 
-
 resource "docker_container" "atlas" {
   name  = "atlas"
   image = docker_image.atlas.latest
@@ -130,6 +127,7 @@ resource "docker_container" "atlas" {
     internal = 80
     external = 80
   }
+  restart = "always"
 }
 
 resource "docker_container" "portainer" {
@@ -147,11 +145,19 @@ resource "docker_container" "portainer" {
     host_path      = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
   }
+  restart = "always"
 }
 
 resource "docker_container" "jaeger" {
   name  = "jaeger"
   image = "jaegertracing/all-in-one:latest"
+
+  ports {
+    internal = 5775
+    external = 5775
+    protocol = "udp"
+  }
+
   ports {
     // accept jaeger.thrift in compact Thrift protocol used by most current Jaeger clients
     internal = 6831

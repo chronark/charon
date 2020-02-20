@@ -1,0 +1,39 @@
+
+ version: "3.7"
+ services:
+   gateway:
+     image: chronark/charon-service-gateway:latest
+     environment:
+      - "SERVICE_ADDRESS=0.0.0.0:52000"
+     ports: 
+       - 52000:52000
+     command: ["./gateway"]
+     networks:
+       - jaeger-example
+   atlas:
+     image: chronark/atlas
+     ports:
+       - 80:80
+     networks:
+       - jaeger-example
+    
+
+   jaeger:
+     image: jaegertracing/all-in-one:latest
+     environment:
+      - "COLLECTOR_ZIPKIN_HTTP_PORT=9411"
+     ports:
+        - 5775:5775/udp
+        - 6831:6831/udp
+        - 6832:6832/udp
+        - 5778:5778
+        - 16686:16686
+        - 14268:14268
+        - 9411:9411
+     networks:
+       - jaeger-example
+
+ networks:
+   jaeger-example:
+
+    
