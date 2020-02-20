@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/chronark/charon/pkg/logging"
+	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/geocoding/handler"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/micro/go-micro/v2"
@@ -9,8 +10,6 @@ import (
 	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
-	"github.com/uber/jaeger-client-go"
-	jaegerprom "github.com/uber/jaeger-lib/metrics/prometheus"
 	"os"
 	"time"
 )
@@ -34,42 +33,14 @@ func init() {
 
 }
 
-type LogrusAdaper struct{}
-
-func (l LogrusAdaper) Error(msg string) {
-	logger.Errorf(msg)
-}
-
-func (l LogrusAdaper) Infof(msg string, args ...interface{}) {
-	logger.Infof(msg, args...)
-}
-
 func main() {
-	factory := jaegerprom.New()
-	metrics := jaeger.NewMetrics(factory, map[string]string{"lib": "jaeger"})
-	time.Sleep(5 * time.Second)
-	transport, err := jaeger.NewUDPTransport(("jaeger:5775"), 0)
+	tracer, closer, err := tracing.NewTracer(serviceName)
 	if err != nil {
-		logger.Error(err)
+		logger.Error("Could not connect to jaeger: " + err.Error())
 	}
-
-	logAdapt := LogrusAdaper{}
-	reporter := jaeger.NewCompositeReporter(
-		jaeger.NewLoggingReporter(logAdapt),
-		jaeger.NewRemoteReporter(transport,
-			jaeger.ReporterOptions.Metrics(metrics),
-			jaeger.ReporterOptions.Logger(logAdapt),
-		),
-	)
-	defer reporter.Close()
-
-	sampler := jaeger.NewConstSampler(true)
-
-	tracer, closer := jaeger.NewTracer("geocoding",
-		sampler, reporter, jaeger.TracerOptions.Metrics(metrics),
-	)
 	defer closer.Close()
 	opentracing.SetGlobalTracer(tracer)
+
 	// New Service
 	service := micro.NewService(
 		micro.Name(serviceName),

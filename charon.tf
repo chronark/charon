@@ -107,6 +107,8 @@ resource "docker_container" "nominatim" {
   command = ["./geocoding"]
   env = [
     "GEOCODING_PROVIDER=nominatim",
+    "JAEGER_AGENT_HOST=jaeger",
+    "JAEGER_AGENT_PORT=5775",
   ]
   networks_advanced {
     name = docker_network.data.name

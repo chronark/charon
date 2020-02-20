@@ -2,9 +2,12 @@ package main
 
 import (
 	"github.com/chronark/charon/pkg/logging"
+	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/filecache/filecache"
 	proto "github.com/chronark/charon/service/filecache/proto/filecache"
 	micro "github.com/micro/go-micro/v2"
+	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
+	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,9 +28,21 @@ func main() {
 	}
 	log.Info("filecache ready")
 
+	tracer, closer, err := tracing.NewTracer(serviceName)
+	if err != nil {
+		log.Error("Could not connect to jaeger: " + err.Error())
+	}
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
+
+	// New Service
 	service := micro.NewService(
 		micro.Name(serviceName),
+		micro.Version("latest"),
+		micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
+		micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
 	)
+
 	service.Init()
 
 	err = proto.RegisterFilecacheServiceHandler(

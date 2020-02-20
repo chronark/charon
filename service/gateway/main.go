@@ -1,7 +1,10 @@
 package main
 
 import (
+	//"github.com/micro/go-micro/v2"
+
 	"github.com/chronark/charon/pkg/logging"
+	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/gateway/handler/nominatim"
 	"github.com/chronark/charon/service/gateway/handler/osm"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
@@ -11,11 +14,9 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
-	"github.com/uber/jaeger-client-go"
-	jaegerprom "github.com/uber/jaeger-lib/metrics/prometheus"
 	"net/http"
+
 	"os"
-	"time"
 )
 
 const serviceName = "charon.service.gateway"
@@ -39,16 +40,6 @@ func corsWrapper(h http.Handler) http.Handler {
 	})
 }
 
-type LogrusAdaper struct{}
-
-func (l LogrusAdaper) Error(msg string) {
-	log.Errorf(msg)
-}
-
-func (l LogrusAdaper) Infof(msg string, args ...interface{}) {
-	log.Infof(msg, args...)
-}
-
 func OpenTracing(h http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		wireCtx, _ := opentracing.GlobalTracer().Extract(
@@ -65,34 +56,19 @@ func OpenTracing(h http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-	factory := jaegerprom.New()
-	metrics := jaeger.NewMetrics(factory, map[string]string{"lib": "jaeger"})
-	time.Sleep(5 * time.Second)
-	transport, err := jaeger.NewUDPTransport(("jaeger:6831"), 0)
+	tracer, closer, err := tracing.NewTracer(serviceName)
 	if err != nil {
-		log.Error(err)
+		log.Error("Could not connect to jaeger: " + err.Error())
 	}
-
-	logAdapt := LogrusAdaper{}
-	reporter := jaeger.NewCompositeReporter(
-		jaeger.NewLoggingReporter(logAdapt),
-		jaeger.NewRemoteReporter(transport,
-			jaeger.ReporterOptions.Metrics(metrics),
-			jaeger.ReporterOptions.Logger(logAdapt),
-		),
-	)
-	defer reporter.Close()
-
-	sampler := jaeger.NewConstSampler(true)
-
-	tracer, closer := jaeger.NewTracer("gateway",
-		sampler, reporter, jaeger.TracerOptions.Metrics(metrics),
-	)
 	defer closer.Close()
 	opentracing.SetGlobalTracer(tracer)
+
+	// New Service
 	service := web.NewService(
 		web.Name(serviceName),
 		web.Address(serviceAddress),
+		//micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
+		//micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
 	)
 
 	nominatimHandler := &nominatim.Handler{
@@ -105,8 +81,8 @@ func main() {
 		Client: tiles.NewTilesService("charon.srv.tiles.osm", client.DefaultClient),
 	}
 
-	service.Handle("/geocoding/forward/", corsWrapper(http.HandlerFunc(nominatimHandler.Forward)))
-	service.Handle("/geocoding/reverse/", corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)))
+	service.Handle("/geocoding/forward/", corsWrapper(OpenTracing(http.HandlerFunc(nominatimHandler.Forward))))
+	service.Handle("/geocoding/reverse/", corsWrapper(OpenTracing(http.HandlerFunc(nominatimHandler.Reverse))))
 
 	service.Handle("/tile/", corsWrapper(OpenTracing(http.HandlerFunc(osmHandler.Get))))
 
