@@ -18,8 +18,9 @@ func (h *Handler) Get(ctx context.Context, req *proto.GetRequest, res *proto.Get
 
 	span.LogFields(log.String("hash", req.GetHashKey()))
 	value, hit, err := h.Cache.Get(req.GetHashKey())
-
+	(hit) ? span.LogEvent("cache-hit") : span.LogEvent("cache-miss")
 	if err != nil {
+
 		span.LogFields(log.Error(err))
 		return err
 	}
