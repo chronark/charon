@@ -4,6 +4,7 @@ import (
 	"github.com/chronark/charon/pkg/logging"
 	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/filecache/filecache"
+	"github.com/chronark/charon/service/filecache/handler"
 	proto "github.com/chronark/charon/service/filecache/proto/filecache"
 	micro "github.com/micro/go-micro/v2"
 	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
@@ -47,7 +48,7 @@ func main() {
 
 	err = proto.RegisterFilecacheServiceHandler(
 		service.Server(),
-		&handler{cache},
+		&handler.Handler{Cache: cache},
 	)
 	if err != nil {
 		log.Fatalf("Error registering filecache service handler: %w", err)

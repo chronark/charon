@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/chronark/charon/service/tiles/handler/osm"
 	"github.com/micro/go-micro/v2"
 
 	"github.com/chronark/charon/pkg/logging"
@@ -49,7 +50,7 @@ func main() {
 	service.Init()
 
 	// Register Handlers
-	tiles.RegisterTilesHandler(service.Server(), &osmHandler{
+	tiles.RegisterTilesHandler(service.Server(), &osm.Handler{
 		Logger: log,
 		Client: service.Client(),
 	})

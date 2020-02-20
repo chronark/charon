@@ -54,7 +54,6 @@ func OpenTracing(h http.HandlerFunc) http.HandlerFunc {
 		h.ServeHTTP(w, r)
 	})
 }
-
 func main() {
 	tracer, closer, err := tracing.NewTracer(serviceName)
 	if err != nil {

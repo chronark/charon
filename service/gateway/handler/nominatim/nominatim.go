@@ -3,6 +3,8 @@ package nominatim
 import (
 	"context"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
@@ -14,6 +16,14 @@ type Handler struct {
 }
 
 func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	span, _ := opentracing.StartSpanFromContext(ctx, "Forward()")
+	defer span.Finish()
+	span.LogFields(
+		log.String("user", r.RemoteAddr),
+		log.String("request", r.URL.String()),
+	)
+
 	h.Logger.Infof("User %s has requested %s", r.RemoteAddr, r.URL)
 
 	query := r.URL.Query().Get("query")
@@ -22,8 +32,9 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rsp, err := h.Client.Forward(context.Background(), &geocoding.Search{Query: query})
+	rsp, err := h.Client.Forward(ctx, &geocoding.Search{Query: query})
 	if err != nil {
+		span.LogFields(log.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -34,6 +45,13 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
+	span, _ := opentracing.StartSpanFromContext(r.Context(), "Reverse()")
+	defer span.Finish()
+	ctx := opentracing.ContextWithSpan(context.Background(), span)
+	span.LogFields(
+		log.String("user", r.RemoteAddr),
+		log.String("request", r.URL.String()),
+	)
 	h.Logger.Infof("User %s has requested %s", r.RemoteAddr, r.URL)
 
 	latString := r.URL.Query().Get("lat")
@@ -57,14 +75,19 @@ func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	span.LogFields(
+		log.Float64("lat", lat),
+		log.Float64("lon", lon),
+	)
 	rsp, err := h.Client.Reverse(
-		context.Background(),
+		ctx,
 		&geocoding.Coordinates{
 			Lat: float32(lat),
 			Lon: float32(lon),
 		},
 	)
 	if err != nil {
+		span.LogFields(log.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
