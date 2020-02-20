@@ -68,7 +68,7 @@ func main() {
 	factory := jaegerprom.New()
 	metrics := jaeger.NewMetrics(factory, map[string]string{"lib": "jaeger"})
 	time.Sleep(5 * time.Second)
-	transport, err := jaeger.NewUDPTransport(("jaeger:5775"), 0)
+	transport, err := jaeger.NewUDPTransport(("jaeger:6831"), 0)
 	if err != nil {
 		log.Error(err)
 	}
@@ -85,7 +85,7 @@ func main() {
 
 	sampler := jaeger.NewConstSampler(true)
 
-	tracer, closer := jaeger.NewTracer("geocoding",
+	tracer, closer := jaeger.NewTracer("gateway",
 		sampler, reporter, jaeger.TracerOptions.Metrics(metrics),
 	)
 	defer closer.Close()

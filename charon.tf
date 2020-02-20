@@ -58,7 +58,7 @@ resource "docker_container" "gateway" {
   networks_advanced {
     name = docker_network.data.name
   }
-   networks_advanced {
+  networks_advanced {
     name = docker_network.tracing.name
   }
 
@@ -79,7 +79,7 @@ resource "docker_container" "filecache" {
   networks_advanced {
     name = docker_network.data.name
   }
-   networks_advanced {
+  networks_advanced {
     name = docker_network.tracing.name
   }
 }
@@ -94,7 +94,7 @@ resource "docker_container" "tiles" {
   networks_advanced {
     name = docker_network.data.name
   }
-   networks_advanced {
+  networks_advanced {
     name = docker_network.tracing.name
   }
 }
@@ -111,7 +111,7 @@ resource "docker_container" "nominatim" {
   networks_advanced {
     name = docker_network.data.name
   }
-   networks_advanced {
+  networks_advanced {
     name = docker_network.tracing.name
   }
 }
@@ -133,7 +133,7 @@ resource "docker_container" "rsyslog" {
     protocol = "udp"
   }
 
-   networks_advanced {
+  networks_advanced {
     name = docker_network.logging.name
   }
 
@@ -169,7 +169,7 @@ resource "docker_container" "atlas" {
   networks_advanced {
     name = docker_network.data.name
   }
-  
+
 }
 
 resource "docker_container" "portainer" {
