@@ -6,7 +6,6 @@ import (
 	"github.com/chronark/charon/service/filecache/proto/filecache"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/micro/go-micro/v2/client"
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -16,7 +15,6 @@ import (
 )
 
 type Nominatim struct {
-	Tracer   opentracing.Tracer
 	Logger   *logrus.Entry
 	Throttle <-chan time.Time
 	Client   client.Client
@@ -52,8 +50,6 @@ func (h *Nominatim) request(url string) ([]byte, error) {
 // Forward makes a call to Nominatim for forward geocoding.
 func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geocoding.ForwardResponse) error {
 	h.Logger.Infof("Search: %s", req.Query)
-	span := h.Tracer.StartSpan("say-hello")
-	span.Finish()
 	hashKey := filepath.Join("nominatim", "forward", req.Query+".json")
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)

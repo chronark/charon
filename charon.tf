@@ -1,7 +1,13 @@
 provider "docker" {
 }
-resource "docker_network" "private_network" {
-  name = "my_network"
+resource "docker_network" "tracing" {
+  name = "jaeger"
+}
+resource "docker_network" "logging" {
+  name = "syslog"
+}
+resource "docker_network" "data" {
+  name = "data"
 }
 
 ##########################
@@ -50,7 +56,10 @@ resource "docker_container" "gateway" {
     external = 52000
   }
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.data.name
+  }
+   networks_advanced {
+    name = docker_network.tracing.name
   }
 
 
@@ -68,7 +77,10 @@ resource "docker_container" "filecache" {
     container_path = "/cache"
   }
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.data.name
+  }
+   networks_advanced {
+    name = docker_network.tracing.name
   }
 }
 
@@ -80,7 +92,10 @@ resource "docker_container" "tiles" {
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.data.name
+  }
+   networks_advanced {
+    name = docker_network.tracing.name
   }
 }
 
@@ -94,7 +109,10 @@ resource "docker_container" "nominatim" {
     "GEOCODING_PROVIDER=nominatim",
   ]
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.data.name
+  }
+   networks_advanced {
+    name = docker_network.tracing.name
   }
 }
 
@@ -114,8 +132,9 @@ resource "docker_container" "rsyslog" {
     external = 514
     protocol = "udp"
   }
-  networks_advanced {
-    name = docker_network.private_network.name
+
+   networks_advanced {
+    name = docker_network.logging.name
   }
 
 }
@@ -131,7 +150,7 @@ resource "docker_container" "logspout" {
   }
   command = ["udp://rsyslog:514"]
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.logging.name
   }
 }
 
@@ -148,8 +167,9 @@ resource "docker_container" "atlas" {
   }
   restart = "always"
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.data.name
   }
+  
 }
 
 resource "docker_container" "portainer" {
@@ -168,9 +188,6 @@ resource "docker_container" "portainer" {
     container_path = "/var/run/docker.sock"
   }
   restart = "always"
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
 }
 
 resource "docker_container" "jaeger" {
@@ -209,7 +226,7 @@ resource "docker_container" "jaeger" {
     external = 9411
   }
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.tracing.name
   }
 
 }
