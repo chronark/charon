@@ -3,6 +3,9 @@ package osm
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/chronark/charon/service/filecache/proto/filecache"
 	"github.com/chronark/charon/service/tiles/hash"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
@@ -10,8 +13,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
 )
 
 type Handler struct {
@@ -20,7 +21,7 @@ type Handler struct {
 }
 
 func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Response) error {
-	span, _ := opentracing.StartSpanFromContext(ctx, "Get")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Get")
 	defer span.Finish()
 
 	h.Logger.Infof("Requesting %+v", req)
@@ -29,6 +30,7 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
 	filecacheGetResponse, err := fileCacheClient.Get(ctx, &filecache.GetRequest{HashKey: hashKey})
 	if err != nil {
+		span.SetTag("error", true)
 		span.LogFields(
 			log.String("message", "Could not get file from filecache"),
 			log.Error(err),

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+
 	"github.com/chronark/charon/service/filecache/filecache"
 	proto "github.com/chronark/charon/service/filecache/proto/filecache"
 	"github.com/opentracing/opentracing-go"
@@ -13,14 +14,18 @@ type Handler struct {
 }
 
 func (h *Handler) Get(ctx context.Context, req *proto.GetRequest, res *proto.GetResponse) error {
-	span, _ := opentracing.StartSpanFromContext(ctx, "Get()")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Get()")
 	defer span.Finish()
 
 	span.LogFields(log.String("hash", req.GetHashKey()))
 	value, hit, err := h.Cache.Get(req.GetHashKey())
-	(hit) ? span.LogEvent("cache-hit") : span.LogEvent("cache-miss")
-	if err != nil {
+	if hit {
+		span.LogEvent("cache-hit")
+	} else {
+		span.LogEvent("cache-miss")
+	}
 
+	if err != nil {
 		span.LogFields(log.Error(err))
 		return err
 	}
@@ -30,7 +35,7 @@ func (h *Handler) Get(ctx context.Context, req *proto.GetRequest, res *proto.Get
 }
 
 func (h *Handler) Set(ctx context.Context, req *proto.SetRequest, res *proto.SetResponse) error {
-	span, _ := opentracing.StartSpanFromContext(ctx, "Set()")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Set()")
 	defer span.Finish()
 
 	span.LogFields(
@@ -46,7 +51,7 @@ func (h *Handler) Set(ctx context.Context, req *proto.SetRequest, res *proto.Set
 }
 
 func (h *Handler) Delete(ctx context.Context, req *proto.DeleteRequest, res *proto.DeleteResponse) error {
-	span, _ := opentracing.StartSpanFromContext(ctx, "Delete()")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Delete()")
 	defer span.Finish()
 
 	span.LogFields(

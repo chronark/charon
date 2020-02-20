@@ -1,13 +1,13 @@
 package nominatim
 
 import (
-	"context"
+	"net/http"
+	"strconv"
+
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -16,8 +16,7 @@ type Handler struct {
 }
 
 func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	span, _ := opentracing.StartSpanFromContext(ctx, "Forward()")
+	span, ctx := opentracing.StartSpanFromContext(r.Context(), "Forward()")
 	defer span.Finish()
 	span.LogFields(
 		log.String("user", r.RemoteAddr),
@@ -40,14 +39,14 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(rsp.GetPayload())
+	span.SetTag("http.status", 200)
 	return
 
 }
 
 func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
-	span, _ := opentracing.StartSpanFromContext(r.Context(), "Reverse()")
+	span, ctx := opentracing.StartSpanFromContext(r.Context(), "Reverse()")
 	defer span.Finish()
-	ctx := opentracing.ContextWithSpan(context.Background(), span)
 	span.LogFields(
 		log.String("user", r.RemoteAddr),
 		log.String("request", r.URL.String()),
@@ -93,6 +92,7 @@ func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(rsp.GetPayload())
+	span.SetTag("http.status_code", 200)
 	return
 
 }

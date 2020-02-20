@@ -3,17 +3,18 @@ package osm
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
-	"net/http"
-	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
 
 func parseCoordinates(ctx context.Context, r *http.Request) (*tiles.Request, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "parseCoordinates")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "parseCoordinates")
 	defer span.Finish()
 
 	x := r.URL.Query().Get("x")
@@ -72,9 +73,9 @@ type Handler struct {
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	span, _ := opentracing.StartSpanFromContext(r.Context(), "Get")
+	span, ctx := opentracing.StartSpanFromContext(r.Context(), "Get")
 	defer span.Finish()
-	ctx := opentracing.ContextWithSpan(context.Background(), span)
+
 	span.LogFields(
 		log.String("user", r.RemoteAddr),
 		log.String("request", r.URL.String()),
@@ -94,6 +95,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	span.SetTag("http.status", 200)
 	w.Header().Set("Content-Type", "image/png")
 	w.Write(rsp.GetFile())
 	return

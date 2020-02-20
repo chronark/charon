@@ -3,17 +3,18 @@ package handler
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/chronark/charon/service/filecache/proto/filecache"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/micro/go-micro/v2/client"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 type Nominatim struct {
@@ -52,7 +53,7 @@ func (h *Nominatim) request(url string) ([]byte, error) {
 
 // Forward makes a call to Nominatim for forward geocoding.
 func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geocoding.ForwardResponse) error {
-	span, _ := opentracing.StartSpanFromContext(ctx, "Forward()")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Forward()")
 	defer span.Finish()
 
 	span.LogFields(log.String("search", req.GetQuery()))
@@ -96,7 +97,7 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 }
 
 func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res *geocoding.ReverseResponse) error {
-	span, _ := opentracing.StartSpanFromContext(ctx, "Forward()")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Forward()")
 	defer span.Finish()
 
 	span.LogFields(log.Float32("lat", req.Lat), log.Float32("lon", req.Lon))
