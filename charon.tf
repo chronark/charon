@@ -1,6 +1,8 @@
 provider "docker" {
 }
-
+resource "docker_network" "private_network" {
+  name = "my_network"
+}
 
 ##########################
 #         Images
@@ -47,6 +49,9 @@ resource "docker_container" "gateway" {
     internal = 52000
     external = 52000
   }
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 
 
 }
@@ -62,6 +67,9 @@ resource "docker_container" "filecache" {
     host_path      = "${path.cwd}/volumes/filecache"
     container_path = "/cache"
   }
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 }
 
 resource "docker_container" "tiles" {
@@ -71,7 +79,9 @@ resource "docker_container" "tiles" {
 
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
-
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 }
 
 resource "docker_container" "nominatim" {
@@ -83,6 +93,9 @@ resource "docker_container" "nominatim" {
   env = [
     "GEOCODING_PROVIDER=nominatim",
   ]
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 }
 
 resource "docker_container" "rsyslog" {
@@ -101,6 +114,9 @@ resource "docker_container" "rsyslog" {
     external = 514
     protocol = "udp"
   }
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 
 }
 
@@ -114,6 +130,9 @@ resource "docker_container" "logspout" {
     container_path = "/var/run/docker.sock"
   }
   command = ["udp://rsyslog:514"]
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 }
 
 
@@ -128,6 +147,9 @@ resource "docker_container" "atlas" {
     external = 80
   }
   restart = "always"
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 }
 
 resource "docker_container" "portainer" {
@@ -146,12 +168,15 @@ resource "docker_container" "portainer" {
     container_path = "/var/run/docker.sock"
   }
   restart = "always"
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
 }
 
 resource "docker_container" "jaeger" {
   name  = "jaeger"
   image = "jaegertracing/all-in-one:latest"
-
+  env   = ["COLLECTOR_ZIPKIN_HTTP_PORT=9411"]
   ports {
     internal = 5775
     external = 5775
@@ -165,6 +190,11 @@ resource "docker_container" "jaeger" {
     protocol = "udp"
   }
   ports {
+    internal = 6832
+    external = 6832
+    protocol = "udp"
+  }
+  ports {
     // UI
     internal = 16686
     external = 16686
@@ -173,6 +203,13 @@ resource "docker_container" "jaeger" {
     // Healthcheck at / and metrics at /metrics
     internal = 14268
     external = 14268
+  }
+  ports {
+    internal = 9411
+    external = 9411
+  }
+  networks_advanced {
+    name = docker_network.private_network.name
   }
 
 }

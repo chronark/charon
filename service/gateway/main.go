@@ -15,6 +15,7 @@ import (
 	jaegerprom "github.com/uber/jaeger-lib/metrics/prometheus"
 	"net/http"
 	"os"
+	"time"
 )
 
 const serviceName = "charon.service.gateway"
@@ -66,7 +67,7 @@ func OpenTracing(h http.HandlerFunc) http.HandlerFunc {
 func main() {
 	factory := jaegerprom.New()
 	metrics := jaeger.NewMetrics(factory, map[string]string{"lib": "jaeger"})
-
+	time.Sleep(5 * time.Second)
 	transport, err := jaeger.NewUDPTransport(("jaeger:5775"), 0)
 	if err != nil {
 		log.Error(err)
