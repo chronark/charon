@@ -11,8 +11,8 @@ import (
 	"github.com/chronark/charon/service/api/handler/osm"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
-	"github.com/micro/go-micro/v2/web"
 	"github.com/micro/go-micro/v2"
+	"github.com/micro/go-micro/v2/web"
 	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
 )
@@ -52,8 +52,6 @@ func main() {
 		micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
 		micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
 	)
-
-
 
 	nominatimHandler := &nominatim.Handler{
 		Logger: logger,
