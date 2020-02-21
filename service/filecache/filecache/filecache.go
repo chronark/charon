@@ -3,14 +3,14 @@ package filecache
 import (
 	"context"
 	"fmt"
-	"github.com/chronark/charon/pkg/logging"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/chronark/charon/pkg/log"
+	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 )
 
 type Cache interface {
@@ -23,18 +23,19 @@ type Cache interface {
 type FileCache struct {
 	Basepath string
 	mutex    *sync.Mutex
-	logger   *logrus.Entry
+	log      log.Factory
 }
 
 // New creates a new filecache instance. Items will be saved in the given path.
-func New(basepath string) (*FileCache, error) {
+func New(basepath string, logger log.Factory) (*FileCache, error) {
+
 	if basepath == "" {
 		return nil, fmt.Errorf("Basepath must not be empty")
 	}
 	fc := &FileCache{
 		Basepath: basepath,
 		mutex:    &sync.Mutex{},
-		logger:   logging.New("charon.srv.filecache"),
+		log:      logger,
 	}
 
 	if err := os.MkdirAll(basepath, os.ModePerm); err != nil {
@@ -46,35 +47,43 @@ func New(basepath string) (*FileCache, error) {
 }
 
 func (fc *FileCache) Get(ctx context.Context, hashKey string) (value []byte, hit bool, err error) {
-	fc.mutex.Lock()
-	defer fc.mutex.Unlock()
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Get()")
 	defer span.Finish()
-	span.LogFields(log.String("hash", hashKey))
+	fc.mutex.Lock()
+	defer fc.mutex.Unlock()
 
 	path := filepath.Join(fc.Basepath, hashKey)
-	span.LogFields(log.String("path", path))
+	fc.log.For(ctx).Info("trying to get file",
+		zap.String("path", path),
+		zap.String("hashKey", hashKey),
+	)
 
 	file, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			span.LogFields(log.Error(err), log.String("cache", "miss"))
-			span.SetTag("error", true)
-			fc.logger.Infof("Miss %s", hashKey)
+			fc.log.For(ctx).Info("Cache access",
+				zap.Bool("hit", false),
+				zap.String("path", path),
+				zap.String("hashKey", hashKey),
+			)
 			return nil, false, nil
 		}
+		span.SetTag("error", true)
+		fc.log.For(ctx).Error("Could not open file", zap.Error(err))
 		return nil, false, err
 	}
-	span.LogFields(log.String("cache", "hit"))
-
 	value, err = ioutil.ReadAll(file)
 	if err != nil {
 		span.SetTag("error", true)
-		span.LogFields(log.Error(err))
+		fc.log.For(ctx).Error("Could not read file", zap.Error(err))
 
 		return nil, false, err
 	}
-	fc.logger.Infof("Hit %s", hashKey)
+	fc.log.For(ctx).Info("Cache access",
+		zap.Bool("hit", true),
+		zap.String("path", path),
+		zap.String("hashKey", hashKey),
+	)
 	return value, true, nil
 }
 
@@ -84,67 +93,90 @@ func (fc *FileCache) Set(ctx context.Context, hashKey string, value []byte) erro
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Set()")
 	defer span.Finish()
-	span.LogFields(log.String("hash", hashKey))
 
 	destPath := filepath.Join(fc.Basepath, hashKey)
+	fc.log.For(ctx).Info("trying to write to path",
+		zap.String("path", destPath),
+		zap.String("hashKey", hashKey),
+	)
 	err := os.MkdirAll(filepath.Dir(destPath), os.ModePerm)
 	if err != nil {
-		span.LogFields(log.Error(err))
 		span.SetTag("error", true)
+		fc.log.For(ctx).Error("Could not create directory", zap.Error(err))
 
-		return fmt.Errorf("Could not create directory for the destination: %w", err)
+		return err
 	}
 	file, err := os.Create(destPath)
 	if err != nil {
 		span.SetTag("error", true)
-
-		span.LogFields(
-			log.String("message", "Could not create file"),
-			log.Error(err),
-		)
-		return fmt.Errorf("Could not create file: %w", err)
+		fc.log.For(ctx).Error("Could not create file", zap.Error(err))
+		return err
 	}
 	_, err = file.Write(value)
 	if err != nil {
-		span.SetTag("error", err)
+		span.SetTag("error", true)
+		fc.log.For(ctx).Error("Could not write to file", zap.Error(err))
 		file.Close()
-		return fmt.Errorf("Could not write to file: %w", err)
+		return err
 	}
 	err = file.Close()
 	if err != nil {
-		span.SetTag("error", err)
-		return fmt.Errorf("Could not close file: %w", err)
+		span.SetTag("error", true)
+		fc.log.For(ctx).Error("Could not close file", zap.Error(err))
+
+		return err
 	}
-	fc.logger.Infof("Stored %s", hashKey)
+	fc.log.For(ctx).Info("Stored data in file",
+		zap.String("hash", hashKey),
+	)
+
 	return nil
 
 }
 func (fc *FileCache) Delete(ctx context.Context, hashKey string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Delete()")
+	defer span.Finish()
 	fc.mutex.Lock()
 	defer fc.mutex.Unlock()
 
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Delete()")
-	defer span.Finish()
-	span.LogFields(log.String("hash", hashKey))
+	fc.log.For(ctx).Info("Trying to delete file",
+		zap.String("hash", hashKey),
+	)
 
 	path := filepath.Join(fc.Basepath, hashKey)
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
+			fc.log.For(ctx).Info("File does not exist",
+				zap.String("path", path),
+			)
 			return nil
 		}
-		span.SetTag("error", err)
+		span.SetTag("error", true)
+		fc.log.For(ctx).Error("Could not get info about file", zap.Error(err))
+
 		return err
 	}
 	err = os.Remove(path)
-	if err == nil {
-		fc.logger.Infof("Removed %s", hashKey)
+	if err != nil {
+		span.SetTag("error", true)
+		fc.log.For(ctx).Error("Could not remove file", zap.Error(err))
+		return err
 	}
-	return err
+	fc.log.For(ctx).Info("Deleted file",
+		zap.String("path", path),
+		zap.String("hash", hashKey),
+	)
+
+	return nil
 }
 
-func (fc *FileCache) Destroy() error {
+func (fc *FileCache) Destroy(ctx context.Context) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Delete()")
+	defer span.Finish()
+
 	fc.mutex.Lock()
 	defer fc.mutex.Unlock()
+	fc.log.For(ctx).Info("Deleting all files")
 	return os.RemoveAll(fc.Basepath)
 }

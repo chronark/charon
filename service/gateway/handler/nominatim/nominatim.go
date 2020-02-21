@@ -1,42 +1,50 @@
 package nominatim
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
+	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type Handler struct {
-	Logger *logrus.Entry
+	Logger log.Factory
 	Client geocoding.GeocodingService
 }
 
 func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
-	span := opentracing.GlobalTracer().StartSpan("Forward()")
-	ctx := opentracing.ContextWithSpan(r.Context(), span)
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "Forward()")
 	defer span.Finish()
-	span.LogFields(
-		log.String("user", r.RemoteAddr),
-		log.String("request", r.URL.String()),
+
+	h.Logger.For(ctx).Info(
+		"Performing forward geocoding",
+		zap.String("user", r.RemoteAddr),
+		zap.String("request", r.URL.String()),
 	)
 
-	h.Logger.Infof("User %s has requested %s", r.RemoteAddr, r.URL)
+	h.Logger.For(ctx).Info("request",
+		zap.String("user", r.RemoteAddr),
+		zap.String("url", r.URL.String()),
+	)
 
 	query := r.URL.Query().Get("query")
 	if query == "" {
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("No query found", zap.String("url", r.URL.String()))
 		http.Error(w, "parameter 'query' was empty'", http.StatusBadRequest)
 		return
 	}
-	span.LogFields(
-		log.String("query", query),
-	)
 	rsp, err := h.Client.Forward(ctx, &geocoding.Search{Query: query})
 	if err != nil {
-		span.LogFields(log.Error(err))
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Could not get geocoding from service",
+			zap.String("query", query),
+			zap.Error(err),
+		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -48,38 +56,45 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
-	span, ctx := opentracing.StartSpanFromContext(r.Context(), "Reverse()")
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "Reverse()")
 	defer span.Finish()
-	span.LogFields(
-		log.String("user", r.RemoteAddr),
-		log.String("request", r.URL.String()),
+	h.Logger.For(ctx).Info(
+		"Performing reverse geocoding",
+		zap.String("user", r.RemoteAddr),
+		zap.String("request", r.URL.String()),
 	)
-	h.Logger.Infof("User %s has requested %s", r.RemoteAddr, r.URL)
 
 	latString := r.URL.Query().Get("lat")
 	if latString == "" {
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("lat was empty")
+
 		http.Error(w, "parameter 'lat' was empty'", http.StatusBadRequest)
 		return
 	}
 	lat, err := strconv.ParseFloat(latString, 32)
 	if err != nil {
-		h.Logger.Errorf("Could not convert lat to float: %w", err)
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Could not convert lat to float", zap.Error(err))
 		return
 	}
 	lonString := r.URL.Query().Get("lon")
 	if lonString == "" {
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("lat was empty")
 		http.Error(w, "parameter 'lon' was empty'", http.StatusBadRequest)
 		return
 	}
 	lon, err := strconv.ParseFloat(lonString, 32)
 	if err != nil {
-		h.Logger.Errorf("Could not convert lat to float: %w", err)
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Could not convert lon to float", zap.Error(err))
 		return
 	}
 
-	span.LogFields(
-		log.Float64("lat", lat),
-		log.Float64("lon", lon),
+	h.Logger.For(ctx).Info("lat and lon",
+		zap.Float64("lat", lat),
+		zap.Float64("lon", lon),
 	)
 	rsp, err := h.Client.Reverse(
 		ctx,
@@ -89,7 +104,8 @@ func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		span.LogFields(log.Error(err))
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Geocoding service returned error", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

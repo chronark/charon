@@ -1,7 +1,11 @@
 package main
 
 import (
-	"github.com/chronark/charon/pkg/logging"
+	"context"
+	"os"
+	"time"
+
+	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/geocoding/handler"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
@@ -9,9 +13,6 @@ import (
 	"github.com/micro/go-micro/v2/client"
 	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
-	"github.com/sirupsen/logrus"
-	"os"
-	"time"
 )
 
 const (
@@ -21,7 +22,6 @@ const (
 var (
 	serviceName       = "charon.srv.geocoding"
 	geocodingProvider string
-	logger            *logrus.Entry
 )
 
 func init() {
@@ -29,18 +29,17 @@ func init() {
 	if geocodingProvider != "" {
 		serviceName = serviceName + "." + geocodingProvider
 	}
-	logger = logging.New(serviceName)
-
 }
 
 func main() {
-	tracer, closer, err := tracing.NewTracer(serviceName)
-	if err != nil {
-		logger.Error("Could not connect to jaeger: " + err.Error())
-	}
+	logger := log.NewDefaultLogger(serviceName)
+
+	tracer, closer := tracing.NewTracer(serviceName, logger)
 	defer closer.Close()
 	opentracing.SetGlobalTracer(tracer)
 
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "main()")
+	defer span.Finish()
 	// New Service
 	service := micro.NewService(
 		micro.Name(serviceName),
@@ -60,13 +59,13 @@ func main() {
 		srvHandler = &handler.Nominatim{Logger: logger, Throttle: time.Tick(time.Second), Client: client.DefaultClient}
 		break
 	default:
-		logger.Error(geocodingProviderNotFoundError)
+		logger.For(ctx).Fatal(geocodingProviderNotFoundError)
 	}
 
 	geocoding.RegisterGeocodingHandler(service.Server(), srvHandler)
 
 	// Run service
 	if err := service.Run(); err != nil {
-		logger.Error(err.Error())
+		logger.For(ctx).Fatal(err.Error())
 	}
 }

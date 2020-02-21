@@ -6,34 +6,38 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/service/filecache/proto/filecache"
 	"github.com/chronark/charon/service/tiles/hash"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 	"github.com/micro/go-micro/v2/client"
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type Handler struct {
 	Client client.Client
-	Logger *logrus.Entry
+	Logger log.Factory
 }
 
 func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Response) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Get")
 	defer span.Finish()
 
-	h.Logger.Infof("Requesting %+v", req)
+	h.Logger.For(ctx).Info("Requesting",
+		zap.Int32("x", req.GetX()),
+		zap.Int32("y", req.GetY()),
+		zap.Int32("z", req.GetZ()),
+	)
 	hashKey := hash.HashRequest(ctx, req)
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
 	filecacheGetResponse, err := fileCacheClient.Get(ctx, &filecache.GetRequest{HashKey: hashKey})
 	if err != nil {
 		span.SetTag("error", true)
-		span.LogFields(
-			log.String("message", "Could not get file from filecache"),
-			log.Error(err),
+		h.Logger.For(ctx).Info(
+			"Could not get file from filecache",
+			zap.Error(err),
 		)
 	}
 	var tile []byte
@@ -43,9 +47,9 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		tileURL := fmt.Sprintf("https://a.tile.openstreetmap.org/%d/%d/%d.png", req.GetZ(), req.GetX(), req.GetY())
 		resp, err := http.Get(tileURL)
 		if err != nil {
-			span.LogFields(
-				log.String("message", "Could not load tile from osm"),
-				log.Error(err),
+			h.Logger.For(ctx).Info(
+				"Could not load tile from osm",
+				zap.Error(err),
 			)
 			return err
 		}
@@ -53,9 +57,9 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		tile, err = ioutil.ReadAll(resp.Body)
 		_, err = fileCacheClient.Set(ctx, &filecache.SetRequest{HashKey: hashKey, File: tile})
 		if err != nil {
-			span.LogFields(
-				log.String("message", "Could not set file to filecache"),
-				log.Error(err))
+			h.Logger.For(ctx).Info(
+				"Could not set file to filecache",
+				zap.Error(err))
 		}
 	}
 	res.File = tile
