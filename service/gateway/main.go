@@ -2,22 +2,22 @@ package main
 
 import (
 	"context"
-	//"github.com/micro/go-micro/v2"
+	"net/http"
+	"os"
+
 	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/gateway/handler/nominatim"
 	"github.com/chronark/charon/service/gateway/handler/osm"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
-	"github.com/micro/go-micro/v2/client"
 	"github.com/micro/go-micro/v2/web"
-	//opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
+	"github.com/micro/go-micro/v2"
+	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
-	"net/http"
-	"os"
 )
 
-const serviceName = "charon.service.gateway"
+const serviceName = "charon.api"
 
 func corsWrapper(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,31 +42,39 @@ func main() {
 	if serviceAddress == "" {
 		logger.For(ctx).Error("You need to specify the environment variable 'SERVICE_ADDRESS' like 'host:post'")
 	}
-	service := web.NewService(
+	api := web.NewService(
 		web.Name(serviceName),
 		web.Address(serviceAddress),
 	)
+	service := micro.NewService(
+		micro.Name("charon.srv.api"),
+		micro.Version("latest"),
+		micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
+		micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
+	)
+
+
 
 	nominatimHandler := &nominatim.Handler{
 		Logger: logger,
-		Client: geocoding.NewGeocodingService("charon.srv.geocoding.nominatim", client.DefaultClient),
+		Client: geocoding.NewGeocodingService("charon.srv.geocoding.nominatim", service.Client()),
 	}
 
 	osmHandler := &osm.Handler{
 		Logger: logger,
-		Client: tiles.NewTilesService("charon.srv.tiles.osm", client.DefaultClient),
+		Client: tiles.NewTilesService("charon.srv.tiles.osm", service.Client()),
 	}
 
-	service.Handle("/geocoding/forward/", corsWrapper(http.HandlerFunc(nominatimHandler.Forward)))
-	service.Handle("/geocoding/reverse/", corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)))
+	api.Handle("/geocoding/forward/", corsWrapper(http.HandlerFunc(nominatimHandler.Forward)))
+	api.Handle("/geocoding/reverse/", corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)))
 
-	service.Handle("/tile/", corsWrapper(http.HandlerFunc(osmHandler.Get)))
+	api.Handle("/tile/", corsWrapper(http.HandlerFunc(osmHandler.Get)))
 
-	if err := service.Init(); err != nil {
+	if err := api.Init(); err != nil {
 		logger.For(ctx).Fatal(err.Error())
 	}
 
-	if err := service.Run(); err != nil {
+	if err := api.Run(); err != nil {
 		logger.For(ctx).Fatal(err.Error())
 	}
 

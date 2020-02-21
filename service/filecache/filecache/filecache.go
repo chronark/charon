@@ -180,3 +180,4 @@ func (fc *FileCache) Destroy(ctx context.Context) error {
 	fc.log.For(ctx).Info("Deleting all files")
 	return os.RemoveAll(fc.Basepath)
 }
+
