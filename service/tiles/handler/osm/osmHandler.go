@@ -29,6 +29,11 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		zap.Int32("y", req.GetY()),
 		zap.Int32("z", req.GetZ()),
 	)
+
+	
+
+
+
 	hashKey := hash.HashRequest(ctx, req)
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)
@@ -71,8 +76,5 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		}
 	}
 	res.File = tile
-	return nil
-}
-func (h *Handler) Delete(ctx context.Context, req *tiles.Request, res *tiles.Response) error {
 	return nil
 }
