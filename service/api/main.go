@@ -7,8 +7,8 @@ import (
 
 	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/pkg/tracing"
-	"github.com/chronark/charon/service/gateway/handler/nominatim"
-	"github.com/chronark/charon/service/gateway/handler/osm"
+	"github.com/chronark/charon/service/api/handler/nominatim"
+	"github.com/chronark/charon/service/api/handler/osm"
 	"github.com/chronark/charon/service/geocoding/proto/geocoding"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 	"github.com/micro/go-micro/v2/web"

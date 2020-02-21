@@ -17,9 +17,9 @@ resource "docker_network" "global" {
 #         Images
 ###########################
 
-resource "docker_image" "gateway" {
-  name          = "chronark/charon-service-gateway:latest"
-  pull_triggers = ["chronark/charon-service-gateway:latest.sha256_digest"]
+resource "docker_image" "api" {
+  name          = "chronark/charon-api:latest"
+  pull_triggers = ["chronark/charon-api:latest.sha256_digest"]
 }
 
 resource "docker_image" "filecache" {
@@ -47,12 +47,12 @@ resource "docker_image" "atlas" {
 #         Services
 ###########################
 
-resource "docker_container" "gateway" {
-  name    = "charon.service.gateway"
-  image   = docker_image.gateway.latest
+resource "docker_container" "api" {
+  name    = "charon.api"
+  image   = docker_image.api.latest
   restart = "always"
 
-  command = ["./gateway"]
+  command = ["./api"]
   env     = ["SERVICE_ADDRESS=0.0.0.0:52000"]
   ports {
     internal = 52000

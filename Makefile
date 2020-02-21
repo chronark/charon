@@ -1,7 +1,7 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build: build-filecache build-gateway build-geocoding build-tiles build-rsyslog build-map
+build: build-filecache build-api build-geocoding build-tiles build-rsyslog build-map
 
 build-map:
 	docker build -t chronark/atlas https://github.com/chronark/atlas.git
@@ -15,11 +15,11 @@ build-filecache:
 	--build-arg SERVICE=filecache \
 	.
 
-build-gateway:
+build-api:
 	docker build \
-	-t chronark/charon-service-gateway \
+	-t chronark/charon-api \
 	-f ./service/Dockerfile \
-	--build-arg SERVICE=gateway \
+	--build-arg SERVICE=api \
 	.
 
 build-geocoding:
@@ -106,7 +106,7 @@ update:
 	rm ./**/**/go.mod
 	rm ./**/**/go.sum
 	cd ./service/filecache && go clean && go mod init github.com/chronark/charon/service/filecache && go get
-	cd ../gateway && go clean && go mod init github.com/chronark/charon/service/gateway && go get
+	cd ../api && go clean && go mod init github.com/chronark/charon/service/api && go get
 	cd ../geocoding && go clean && go mod init github.com/chronark/charon/service/geocoding && go get
 	cd ../tiles && go clean && go mod init github.com/chronark/charon/service/tiles && go get
 
