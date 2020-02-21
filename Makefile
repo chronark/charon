@@ -1,7 +1,7 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
-build: build-filecache build-gateway build-geocoding build-tiles build-rsyslog build-map
+build: build-filecache build-api build-geocoding build-tiles build-rsyslog build-map
 
 build-map:
 	docker build -t chronark/atlas https://github.com/chronark/atlas.git
@@ -15,11 +15,11 @@ build-filecache:
 	--build-arg SERVICE=filecache \
 	.
 
-build-gateway:
+build-api:
 	docker build \
-	-t chronark/charon-service-gateway \
+	-t chronark/charon-api \
 	-f ./service/Dockerfile \
-	--build-arg SERVICE=gateway \
+	--build-arg SERVICE=api \
 	.
 
 build-geocoding:
@@ -46,17 +46,18 @@ fmt:
 	go fmt ./...
 	go vet ./...
 	go mod tidy
+	golangci-lint run ./...
 
 init:
 	[ ! -f ./terraform ] && make get-terraform || true
 	./terraform init
 
-plan:
+plan: init
 	./terraform plan -out tfplan
 
-apply:
-	./terraform apply "tfplan" || echo "If you are missing docker images, please run 'make build' and try again."
-
+apply: plan
+	./terraform apply "tfplan"
+	
 purge:
 	./terraform destroy -auto-approve ||true
 	docker rm -f $$(docker ps -aq) || true 
@@ -76,6 +77,7 @@ netdata:
 	--cap-add SYS_PTRACE \
 	--security-opt apparmor=unconfined \
 	netdata/netdata
+
 get-terraform:
 	curl -o terraform.zip https://releases.hashicorp.com/terraform/0.12.19/terraform_0.12.19_linux_amd64.zip
 	unzip -o terraform.zip
@@ -104,7 +106,7 @@ update:
 	rm ./**/**/go.mod
 	rm ./**/**/go.sum
 	cd ./service/filecache && go clean && go mod init github.com/chronark/charon/service/filecache && go get
-	cd ../gateway && go clean && go mod init github.com/chronark/charon/service/gateway && go get
+	cd ../api && go clean && go mod init github.com/chronark/charon/service/api && go get
 	cd ../geocoding && go clean && go mod init github.com/chronark/charon/service/geocoding && go get
 	cd ../tiles && go clean && go mod init github.com/chronark/charon/service/tiles && go get
 

@@ -1,5 +1,4 @@
 FROM golang:1.13 as service_builder
-ARG SERVICE
 
 WORKDIR /charon
 
@@ -8,6 +7,9 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
+
+ARG SERVICE
+
 ENV GOOS linux
 ENV GOARCH amd64
 ENV CGO_ENABLED 0

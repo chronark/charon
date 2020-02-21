@@ -71,9 +71,9 @@ Discovery name: `charon.srv.filecache`
 Filecache is a basic cache that writes or reads bytes to and from the disk.
 The cache is mounted on the host as `./volumes/filecache` and can be backed up or modified by removing or adding files on the host machine.
 
-### Gateway
+### API
 
-The HTTP API gateway to interact with all microservices. Exposes various routes to fetch data.
+The HTTP API to interact with all microservices. Exposes various routes to fetch data.
 Listens on port 52000
 Routes:
 

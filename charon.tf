@@ -1,28 +1,25 @@
 provider "docker" {
 }
-
-
-
-###########################
-#         Networks
-###########################
-
-resource "docker_network" "private_network" {
-  name     = "internal_network"
-  internal = false
-}
-resource "docker_network" "logging" {
-  name     = "logging"
-  internal = true
+# resource "docker_network" "tracing" {
+#   name = "jaeger"
+# }
+# resource "docker_network" "logging" {
+#   name = "syslog"
+# }
+# resource "docker_network" "data" {
+#   name = "data"
+# }
+resource "docker_network" "global" {
+  name = "global"
 }
 
 ##########################
 #         Images
 ###########################
 
-resource "docker_image" "gateway" {
-  name          = "chronark/charon-service-gateway:latest"
-  pull_triggers = ["chronark/charon-service-gateway:latest.sha256_digest"]
+resource "docker_image" "api" {
+  name          = "chronark/charon-api:latest"
+  pull_triggers = ["chronark/charon-api:latest.sha256_digest"]
 }
 
 resource "docker_image" "filecache" {
@@ -50,73 +47,101 @@ resource "docker_image" "atlas" {
 #         Services
 ###########################
 
-resource "docker_container" "gateway" {
-  name    = "charon.service.gateway"
-  image   = docker_image.gateway.latest
-  restart = "on-failure"
+resource "docker_container" "api" {
+  name    = "charon.api"
+  image   = docker_image.api.latest
+  restart = "always"
 
-  command = ["./gateway"]
+  command = ["./api"]
   env     = ["SERVICE_ADDRESS=0.0.0.0:52000"]
   ports {
     internal = 52000
     external = 52000
   }
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.global.name
   }
+
 
 }
 
 resource "docker_container" "filecache" {
   name    = "charon.service.filecache"
   image   = docker_image.filecache.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./filecache"]
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
+
   volumes {
     host_path      = "${path.cwd}/volumes/filecache"
     container_path = "/cache"
   }
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
 }
 
 resource "docker_container" "tiles" {
   name    = "charon.service.tiles"
   image   = docker_image.tiles.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.global.name
   }
+
 }
 
 resource "docker_container" "nominatim" {
   name    = "charon.service.geocoding.nominatim"
   image   = docker_image.geocoding.latest
-  restart = "on-failure"
+  restart = "always"
 
   command = ["./geocoding"]
   env = [
     "GEOCODING_PROVIDER=nominatim",
-    "DATASTORE_HOST=mongodb:27017",
+    "JAEGER_AGENT_HOST=jaeger",
+    "JAEGER_AGENT_PORT=5775",
   ]
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.private_network.name
+    name = docker_network.global.name
   }
+
 }
 
 resource "docker_container" "rsyslog" {
   name    = "rsyslog"
   image   = "chronark/rsyslog"
-  restart = "on-failure"
+  restart = "always"
 
-  networks_advanced {
-    name = docker_network.logging.name
-  }
+
   volumes {
     host_path      = "${path.cwd}/volumes/syslog"
     container_path = "/var/logs"
@@ -128,42 +153,37 @@ resource "docker_container" "rsyslog" {
     protocol = "udp"
   }
 
+  # networks_advanced {
+  #   name = docker_network.logging.name
+  # }
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
 }
 
 resource "docker_container" "logspout" {
   name    = "logspout"
   image   = "gliderlabs/logspout"
-  restart = "on-failure"
-  networks_advanced {
-    name = docker_network.logging.name
-  }
+  restart = "always"
+
   volumes {
     host_path      = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
   }
   command = ["udp://rsyslog:514"]
+  # networks_advanced {
+  #   name = docker_network.logging.name
+  # }
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
 }
 
 
 
 
-
-
-# resource "docker_container" "geocodingclient" {
-#   name  = "charon.client.geocoding"
-#   image = "chronark/charon-client-geocoding"
-#   networks_advanced {
-#     name = docker_network.private_network.name
-#   }
-# }
-
-# resource "docker_container" "tilesclient" {
-#   name  = "charon.client.tiles"
-#   image = "chronark/charon-client-tiles"
-#   networks_advanced {
-#     name = docker_network.private_network.name
-#   }
-# }
 
 resource "docker_container" "atlas" {
   name  = "atlas"
@@ -172,6 +192,14 @@ resource "docker_container" "atlas" {
     internal = 80
     external = 80
   }
+  restart = "always"
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
 }
 
 resource "docker_container" "portainer" {
@@ -189,5 +217,53 @@ resource "docker_container" "portainer" {
     host_path      = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
   }
+  restart = "always"
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
 }
 
+resource "docker_container" "jaeger" {
+  name  = "jaeger"
+  image = "jaegertracing/all-in-one:latest"
+  env   = ["COLLECTOR_ZIPKIN_HTTP_PORT=9411"]
+  ports {
+    internal = 5775
+    external = 5775
+    protocol = "udp"
+  }
+
+  ports {
+    // accept jaeger.thrift in compact Thrift protocol used by most current Jaeger clients
+    internal = 6831
+    external = 6831
+    protocol = "udp"
+  }
+  ports {
+    internal = 6832
+    external = 6832
+    protocol = "udp"
+  }
+  ports {
+    // UI
+    internal = 16686
+    external = 16686
+  }
+  ports {
+    // Healthcheck at / and metrics at /metrics
+    internal = 14268
+    external = 14268
+  }
+  ports {
+    internal = 9411
+    external = 9411
+  }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
+}

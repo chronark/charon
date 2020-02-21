@@ -1,50 +1,57 @@
 package main
 
 import (
-	"github.com/chronark/charon/pkg/logging"
+	"context"
+
+	"github.com/chronark/charon/pkg/log"
+	"github.com/chronark/charon/pkg/tracing"
 	"github.com/chronark/charon/service/filecache/filecache"
+	"github.com/chronark/charon/service/filecache/handler"
 	proto "github.com/chronark/charon/service/filecache/proto/filecache"
 	micro "github.com/micro/go-micro/v2"
-	"github.com/sirupsen/logrus"
+	opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
+	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 )
 
 var serviceName = "charon.srv.filecache"
 
-var log *logrus.Entry
-
-func init() {
-	log = logging.New(serviceName)
-}
-
 func main() {
-	log.Infof("Initializing %s\n", serviceName)
+	logger := log.NewDefaultLogger(serviceName)
 
-	cache, err := filecache.New("./cache")
+	tracer, closer := tracing.NewTracer(serviceName, logger)
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
+
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "main()")
+	defer span.Finish()
+	cache, err := filecache.New("./cache", logger)
 	if err != nil {
-		log.Fatalf("Error initializing cache: %w", err)
+		logger.For(ctx).Fatal("Error initializing cache", zap.Error(err))
 	}
-	log.Info("filecache ready")
+	logger.For(ctx).Info("filecache ready")
 
+	// New Service
 	service := micro.NewService(
 		micro.Name(serviceName),
+		micro.Version("latest"),
+		micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
+		micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
 	)
+
 	service.Init()
 
-
-
-
-	
 	err = proto.RegisterFilecacheServiceHandler(
 		service.Server(),
-		&handler{cache},
+		&handler.Handler{Logger: logger, Cache: cache},
 	)
 	if err != nil {
-		log.Fatalf("Error registering filecache service handler: %w", err)
+		logger.For(ctx).Error("Error registering filecache service handler", zap.Error(err))
 	}
 
-	log.Infof("Service [%s] starting", serviceName)
+	logger.For(ctx).Info("Service starting", zap.String("service name", serviceName))
 	err = service.Run()
 	if err != nil {
-		log.Fatalf("Error running service: %w", err)
+		logger.For(ctx).Error("Error running service", zap.Error(err))
 	}
 }
