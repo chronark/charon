@@ -12,8 +12,15 @@ import (
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 )
 
+
+func urlConstructor(parameters string) *url.URL {
+	url, _ := url.Parse("http://server/?" + parameters)
+	return url
+}
+
+
+
 func TestHandler_parseCoordinates(t *testing.T) {
-	validURL, _ := url.Parse("http://dummy/?x=1&y=2&z=3")
 
 
 	type fields struct {
@@ -40,7 +47,7 @@ func TestHandler_parseCoordinates(t *testing.T) {
 			args: args{
 				ctx: context.TODO(),
 				r: &http.Request{
-					URL: validURL,
+					URL: urlConstructor("x=1&y=2&z=3"),
 				},
 			},
 			want: &tiles.Request{
@@ -49,6 +56,51 @@ func TestHandler_parseCoordinates(t *testing.T) {
 				Z: 3,
 			},
 			wantErr: false,
+		},
+		{
+			name: "missing x",
+			fields: fields{
+				Logger: log.NewDefaultLogger("service"),
+				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
+			},
+			args: args{
+				ctx: context.TODO(),
+				r: &http.Request{
+					URL:  urlConstructor("y=2&z=3"),
+				},
+			},
+			want: nil,
+			wantErr: true,
+		},
+		{
+			name: "missing y",
+			fields: fields{
+				Logger: log.NewDefaultLogger("service"),
+				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
+			},
+			args: args{
+				ctx: context.TODO(),
+				r: &http.Request{
+					URL:  urlConstructor("x=2&z=3"),
+				},
+			},
+			want: nil,
+			wantErr: true,
+		},
+		{
+			name: "missing z",
+			fields: fields{
+				Logger: log.NewDefaultLogger("service"),
+				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
+			},
+			args: args{
+				ctx: context.TODO(),
+				r: &http.Request{
+					URL:  urlConstructor("y=2&x=3"),
+				},
+			},
+			want: nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -65,33 +117,6 @@ func TestHandler_parseCoordinates(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Handler.parseCoordinates() = %v, want %v", got, tt.want)
 			}
-		})
-	}
-}
-
-func TestHandler_Get(t *testing.T) {
-	type fields struct {
-		Logger log.Factory
-		Client tiles.TilesService
-	}
-	type args struct {
-		w http.ResponseWriter
-		r *http.Request
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &Handler{
-				Logger: tt.fields.Logger,
-				Client: tt.fields.Client,
-			}
-			h.Get(tt.args.w, tt.args.r)
 		})
 	}
 }
