@@ -1,13 +1,16 @@
 provider "docker" {
 }
-resource "docker_network" "tracing" {
-  name = "jaeger"
-}
-resource "docker_network" "logging" {
-  name = "syslog"
-}
-resource "docker_network" "data" {
-  name = "data"
+# resource "docker_network" "tracing" {
+#   name = "jaeger"
+# }
+# resource "docker_network" "logging" {
+#   name = "syslog"
+# }
+# resource "docker_network" "data" {
+#   name = "data"
+# }
+resource "docker_network" "global" {
+  name = "global"
 }
 
 ##########################
@@ -55,11 +58,14 @@ resource "docker_container" "gateway" {
     internal = 52000
     external = 52000
   }
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.data.name
-  }
-  networks_advanced {
-    name = docker_network.tracing.name
+    name = docker_network.global.name
   }
 
 
@@ -76,12 +82,16 @@ resource "docker_container" "filecache" {
     host_path      = "${path.cwd}/volumes/filecache"
     container_path = "/cache"
   }
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.data.name
+    name = docker_network.global.name
   }
-  networks_advanced {
-    name = docker_network.tracing.name
-  }
+
 }
 
 resource "docker_container" "tiles" {
@@ -91,12 +101,16 @@ resource "docker_container" "tiles" {
 
   command = ["./tiles"]
   env     = ["TILE_PROVIDER=osm"]
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.data.name
+    name = docker_network.global.name
   }
-  networks_advanced {
-    name = docker_network.tracing.name
-  }
+
 }
 
 resource "docker_container" "nominatim" {
@@ -110,12 +124,16 @@ resource "docker_container" "nominatim" {
     "JAEGER_AGENT_HOST=jaeger",
     "JAEGER_AGENT_PORT=5775",
   ]
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.data.name
+    name = docker_network.global.name
   }
-  networks_advanced {
-    name = docker_network.tracing.name
-  }
+
 }
 
 resource "docker_container" "rsyslog" {
@@ -135,8 +153,11 @@ resource "docker_container" "rsyslog" {
     protocol = "udp"
   }
 
+  # networks_advanced {
+  #   name = docker_network.logging.name
+  # }
   networks_advanced {
-    name = docker_network.logging.name
+    name = docker_network.global.name
   }
 
 }
@@ -151,9 +172,13 @@ resource "docker_container" "logspout" {
     container_path = "/var/run/docker.sock"
   }
   command = ["udp://rsyslog:514"]
+  # networks_advanced {
+  #   name = docker_network.logging.name
+  # }
   networks_advanced {
-    name = docker_network.logging.name
+    name = docker_network.global.name
   }
+
 }
 
 
@@ -168,8 +193,11 @@ resource "docker_container" "atlas" {
     external = 80
   }
   restart = "always"
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
   networks_advanced {
-    name = docker_network.data.name
+    name = docker_network.global.name
   }
 
 }
@@ -190,6 +218,10 @@ resource "docker_container" "portainer" {
     container_path = "/var/run/docker.sock"
   }
   restart = "always"
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
 }
 
 resource "docker_container" "jaeger" {
@@ -227,8 +259,11 @@ resource "docker_container" "jaeger" {
     internal = 9411
     external = 9411
   }
+  # networks_advanced {
+  #   name = docker_network.tracing.name
+  # }
   networks_advanced {
-    name = docker_network.tracing.name
+    name = docker_network.global.name
   }
 
 }

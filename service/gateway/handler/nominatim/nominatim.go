@@ -16,7 +16,8 @@ type Handler struct {
 }
 
 func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
-	span, ctx := opentracing.StartSpanFromContext(r.Context(), "Forward()")
+	span := opentracing.GlobalTracer().StartSpan("Forward()")
+	ctx := opentracing.ContextWithSpan(r.Context(), span)
 	defer span.Finish()
 	span.LogFields(
 		log.String("user", r.RemoteAddr),
@@ -30,7 +31,9 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "parameter 'query' was empty'", http.StatusBadRequest)
 		return
 	}
-
+	span.LogFields(
+		log.String("query", query),
+	)
 	rsp, err := h.Client.Forward(ctx, &geocoding.Search{Query: query})
 	if err != nil {
 		span.LogFields(log.Error(err))

@@ -16,9 +16,8 @@ type Handler struct {
 func (h *Handler) Get(ctx context.Context, req *proto.GetRequest, res *proto.GetResponse) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Get()")
 	defer span.Finish()
-
 	span.LogFields(log.String("hash", req.GetHashKey()))
-	value, hit, err := h.Cache.Get(req.GetHashKey())
+	value, hit, err := h.Cache.Get(ctx, req.GetHashKey())
 	if hit {
 		span.LogEvent("cache-hit")
 	} else {
@@ -40,7 +39,7 @@ func (h *Handler) Set(ctx context.Context, req *proto.SetRequest, res *proto.Set
 
 	span.LogFields(
 		log.String("hash", req.GetHashKey()))
-	err := h.Cache.Set(req.GetHashKey(), req.GetFile())
+	err := h.Cache.Set(ctx, req.GetHashKey(), req.GetFile())
 
 	if err != nil {
 		span.LogFields(log.Error(err))
@@ -56,7 +55,7 @@ func (h *Handler) Delete(ctx context.Context, req *proto.DeleteRequest, res *pro
 
 	span.LogFields(
 		log.String("hash", req.GetHashKey()))
-	err := h.Cache.Delete(req.GetHashKey())
+	err := h.Cache.Delete(ctx, req.GetHashKey())
 
 	if err != nil {
 		span.LogFields(log.Error(err))

@@ -11,11 +11,10 @@ import (
 	"github.com/chronark/charon/service/tiles/proto/tiles"
 	"github.com/micro/go-micro/v2/client"
 	"github.com/micro/go-micro/v2/web"
+	//opentracingWrapper "github.com/micro/go-plugins/wrapper/trace/opentracing/v2"
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
 	"net/http"
-
 	"os"
 )
 
@@ -40,20 +39,6 @@ func corsWrapper(h http.Handler) http.Handler {
 	})
 }
 
-func OpenTracing(h http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		wireCtx, _ := opentracing.GlobalTracer().Extract(
-			opentracing.HTTPHeaders,
-			opentracing.HTTPHeadersCarrier(r.Header))
-
-		serverSpan := opentracing.StartSpan(r.URL.Path,
-			ext.RPCServerOption(wireCtx))
-		defer serverSpan.Finish()
-		r = r.WithContext(opentracing.ContextWithSpan(r.Context(), serverSpan))
-
-		h.ServeHTTP(w, r)
-	})
-}
 func main() {
 	tracer, closer, err := tracing.NewTracer(serviceName)
 	if err != nil {
@@ -66,8 +51,6 @@ func main() {
 	service := web.NewService(
 		web.Name(serviceName),
 		web.Address(serviceAddress),
-		//micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
-		//micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
 	)
 
 	nominatimHandler := &nominatim.Handler{
@@ -80,10 +63,10 @@ func main() {
 		Client: tiles.NewTilesService("charon.srv.tiles.osm", client.DefaultClient),
 	}
 
-	service.Handle("/geocoding/forward/", corsWrapper(OpenTracing(http.HandlerFunc(nominatimHandler.Forward))))
-	service.Handle("/geocoding/reverse/", corsWrapper(OpenTracing(http.HandlerFunc(nominatimHandler.Reverse))))
+	service.Handle("/geocoding/forward/", corsWrapper(http.HandlerFunc(nominatimHandler.Forward)))
+	service.Handle("/geocoding/reverse/", corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)))
 
-	service.Handle("/tile/", corsWrapper(OpenTracing(http.HandlerFunc(osmHandler.Get))))
+	service.Handle("/tile/", corsWrapper(http.HandlerFunc(osmHandler.Get)))
 
 	if err := service.Init(); err != nil {
 		log.Fatal(err)
