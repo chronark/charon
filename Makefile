@@ -1,6 +1,10 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
 
+
+test:
+	go test -covermode=atomic ./...
+
 build: build-filecache build-api build-geocoding build-tiles build-rsyslog build-map
 
 build-map:
