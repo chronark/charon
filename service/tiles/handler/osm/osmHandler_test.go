@@ -29,7 +29,7 @@ func TestHandler_Get(t *testing.T) {
 			name: "Successful test",
 			fields: fields{
 				Client: client.DefaultClient,
-				Logger: log.NewDefaultLogger("service"),
+				Logger: log.NewEmptyLogger(),
 			},
 			args: args{
 				ctx: context.TODO(),

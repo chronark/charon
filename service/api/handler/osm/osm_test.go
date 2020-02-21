@@ -41,7 +41,7 @@ func TestHandler_parseCoordinates(t *testing.T) {
 		{
 			name: "Successful parse",
 			fields: fields{
-				Logger: log.NewDefaultLogger("service"),
+				Logger: log.NewEmptyLogger(),
 				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
 			},
 			args: args{
@@ -60,7 +60,7 @@ func TestHandler_parseCoordinates(t *testing.T) {
 		{
 			name: "missing x",
 			fields: fields{
-				Logger: log.NewDefaultLogger("service"),
+				Logger: log.NewEmptyLogger(),
 				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
 			},
 			args: args{
@@ -75,7 +75,7 @@ func TestHandler_parseCoordinates(t *testing.T) {
 		{
 			name: "missing y",
 			fields: fields{
-				Logger: log.NewDefaultLogger("service"),
+				Logger: log.NewEmptyLogger(),
 				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
 			},
 			args: args{
@@ -90,7 +90,7 @@ func TestHandler_parseCoordinates(t *testing.T) {
 		{
 			name: "missing z",
 			fields: fields{
-				Logger: log.NewDefaultLogger("service"),
+				Logger: log.NewEmptyLogger(),
 				Client: tiles.NewTilesService("test.srv.tiles", client.DefaultClient),
 			},
 			args: args{
