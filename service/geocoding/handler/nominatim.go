@@ -92,7 +92,12 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 			return err
 		}
 		res.Payload = geojson
-		fileCacheClient.Set(ctx, &filecache.SetRequest{HashKey: hashKey, File: geojson})
+		_, err = fileCacheClient.Set(ctx, &filecache.SetRequest{HashKey: hashKey, File: geojson})
+		if err != nil {
+			h.Logger.For(ctx).Info(
+				"Could not set file to filecache",
+				zap.Error(err))
+		}
 	}
 
 	return nil
@@ -127,7 +132,12 @@ func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res
 		}
 
 		res.Payload = geojson
-		fileCacheClient.Set(ctx, &filecache.SetRequest{HashKey: hashKey, File: geojson})
+		_, err = fileCacheClient.Set(ctx, &filecache.SetRequest{HashKey: hashKey, File: geojson})
+		if err != nil {
+			h.Logger.For(ctx).Info(
+				"Could not set file to filecache",
+				zap.Error(err))
+		}
 	}
 
 	return nil

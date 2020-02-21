@@ -57,15 +57,17 @@ func main() {
 	switch geocodingProvider {
 	case "nominatim":
 		srvHandler = &handler.Nominatim{Logger: logger, Throttle: time.Tick(time.Second), Client: client.DefaultClient}
-		break
 	default:
 		logger.For(ctx).Fatal(geocodingProviderNotFoundError)
 	}
 
-	geocoding.RegisterGeocodingHandler(service.Server(), srvHandler)
-
+	err := geocoding.RegisterGeocodingHandler(service.Server(), srvHandler)
+	if err != nil {
+		logger.For(ctx).Fatal(err.Error())
+	}
 	// Run service
-	if err := service.Run(); err != nil {
+	err = service.Run()
+	if err != nil {
 		logger.For(ctx).Fatal(err.Error())
 	}
 }

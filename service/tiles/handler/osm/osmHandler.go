@@ -47,6 +47,7 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		tileURL := fmt.Sprintf("https://a.tile.openstreetmap.org/%d/%d/%d.png", req.GetZ(), req.GetX(), req.GetY())
 		resp, err := http.Get(tileURL)
 		if err != nil {
+			span.SetTag("error", true)
 			h.Logger.For(ctx).Info(
 				"Could not load tile from osm",
 				zap.Error(err),
@@ -55,6 +56,13 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		}
 		defer resp.Body.Close()
 		tile, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			span.SetTag("error", true)
+			h.Logger.For(ctx).Info(
+				"Could not read response body",
+				zap.Error(err))
+			return err
+		}
 		_, err = fileCacheClient.Set(ctx, &filecache.SetRequest{HashKey: hashKey, File: tile})
 		if err != nil {
 			h.Logger.For(ctx).Info(

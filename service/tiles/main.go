@@ -12,8 +12,6 @@ import (
 	"os"
 )
 
-const providerError = "You must set the environment variable 'TILE_PROVIDER' with either 'osm' or 'mapbox'"
-
 var serviceName = "charon.srv.tiles"
 var tileProvider string
 
@@ -45,13 +43,17 @@ func main() {
 	service.Init()
 
 	// Register Handlers
-	tiles.RegisterTilesHandler(service.Server(), &osm.Handler{
+	err := tiles.RegisterTilesHandler(service.Server(), &osm.Handler{
 		Logger: logger,
 		Client: service.Client(),
 	})
+	if err != nil {
+		logger.For(ctx).Fatal(err.Error())
+	}
 
 	// Run server
-	if err := service.Run(); err != nil {
+	err = service.Run()
+	if err != nil {
 		logger.For(ctx).Fatal(err.Error())
 	}
 }

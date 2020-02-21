@@ -79,18 +79,13 @@ func (h *Handler) parseCoordinates(ctx context.Context, r *http.Request) (*tiles
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	span, ctx := opentracing.StartSpanFromContext(r.Context(), "Get")
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "Get")
 	defer span.Finish()
 
 	h.Logger.For(ctx).Info(
 		"request",
 		zap.String("user", r.RemoteAddr),
 		zap.String("request", r.URL.String()),
-	)
-
-	h.Logger.For(ctx).Info("request",
-		zap.String("user", r.RemoteAddr),
-		zap.String("url", r.URL.String()),
 	)
 
 	req, err := h.parseCoordinates(ctx, r)
@@ -100,6 +95,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	rsp, err := h.Client.Get(ctx, req)
 	if err != nil {
 		span.SetTag("error", true)
@@ -107,9 +103,15 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	span.SetTag("http.status", 200)
-	w.Header().Set("Content-Type", "image/png")
-	w.Write(rsp.GetFile())
-	return
 
+	w.Header().Set("Content-Type", "image/png")
+	_, err = w.Write(rsp.GetFile())
+	if err != nil {
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Could not write data", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	span.SetTag("http.status", 200)
 }

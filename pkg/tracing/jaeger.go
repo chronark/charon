@@ -33,7 +33,7 @@ func NewTracer(serviceName string, logger log.Factory) (opentracing.Tracer, io.C
 			Param: 1,
 		},
 		Reporter: &config.ReporterConfig{
-			LogSpans:           true,
+			LogSpans:           false,
 			LocalAgentHostPort: "jaeger:5775",
 		},
 	}

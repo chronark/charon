@@ -49,9 +49,14 @@ func (h *Handler) Forward(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(rsp.GetPayload())
+	_, err = w.Write(rsp.GetPayload())
+	if err != nil {
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Could not write data", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	span.SetTag("http.status", 200)
-	return
 
 }
 
@@ -110,8 +115,13 @@ func (h *Handler) Reverse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(rsp.GetPayload())
+	_, err = w.Write(rsp.GetPayload())
+	if err != nil {
+		span.SetTag("error", true)
+		h.Logger.For(ctx).Error("Could not write data", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	span.SetTag("http.status_code", 200)
-	return
 
 }
