@@ -18,7 +18,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: chronark/charon/${{ matrix.service }}
+          name: chronark/charon.srv.${{ matrix.service }}
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           #registry: docker.pkg.github.com
@@ -33,7 +33,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: chronark/charon/rsyslog
+          name: chronark/charon.rsyslog
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           #registry: docker.pkg.github.com
