@@ -18,12 +18,12 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: chronark/charon/${{ service }}
+          name: chronark/charon/${{ matrix.service }}
           username: ${{ github.actor }}
           password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           registry: docker.pkg.github.com
           dockerfile: ./service/Dockerfile
-          buildargs: SERVICE=${{ service }}
+          buildargs: SERVICE=${{ matrix.service }}
 
   publish_rsyslog:
     runs-on: ubuntu-latest
