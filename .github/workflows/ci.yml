@@ -53,7 +53,7 @@ jobs:
       - name: Unittests
         run: go test -covermode=atomic ./...
 
-  building:
+  building_services:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -63,6 +63,12 @@ jobs:
       - uses: actions/checkout@v1
       - name: Build ${{ matrix.service}}
         run: docker build -t chronark/charon-${{ matrix.service}} -f ./service/Dockerfile --build-arg SERVICE=${{ matrix.service}} .
+      
+  
+  building_rsyslog:
+    runs-on: ubuntu-latest
+    name: Build rsyslog
+    steps:
+      - uses: actions/checkout@v1
       - name: Build rsyslog
         run: docker build -t chronark/rsyslog ./service/rsyslog
-     
