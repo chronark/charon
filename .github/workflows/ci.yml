@@ -49,7 +49,7 @@ jobs:
         run: go mod download
 
       - name: Unittests
-        run: go test
+        run: go test -covermode=atomic ./...
 
   building:
     runs-on: ubuntu-latest
