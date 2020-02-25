@@ -19,9 +19,9 @@ jobs:
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: chronark/charon/${{ matrix.service }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          registry: docker.pkg.github.com
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          #registry: docker.pkg.github.com
           dockerfile: ./service/Dockerfile
           buildargs: SERVICE=${{ matrix.service }}
 
@@ -34,8 +34,8 @@ jobs:
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: chronark/charon/rsyslog
-          username: ${{ github.actor }}
-          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          registry: docker.pkg.github.com
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          #registry: docker.pkg.github.com
           context: ./service/rsyslog/
-          dockerfile: ./Dockerfile
+          dockerfile: ./service/rsyslog/Dockerfile
