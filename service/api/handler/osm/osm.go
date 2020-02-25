@@ -23,7 +23,7 @@ func (h *Handler) parseCoordinates(ctx context.Context, r *http.Request) (*tiles
 
 	x := r.URL.Query().Get("x")
 	if x == "" {
-		err := fmt.Errorf("Parameter x was empty")
+		err := fmt.Errorf("parameter x was empty")
 		span.SetTag("error", true)
 		h.Logger.For(ctx).Error(err.Error())
 		return nil, err
@@ -31,13 +31,13 @@ func (h *Handler) parseCoordinates(ctx context.Context, r *http.Request) (*tiles
 	xInt, err := strconv.ParseInt(x, 10, 32)
 	if err != nil {
 		span.SetTag("error", true)
-		h.Logger.For(ctx).Error("Error parsing x", zap.Error(err))
+		h.Logger.For(ctx).Error("error parsing x", zap.Error(err))
 		return nil, err
 	}
 
 	y := r.URL.Query().Get("y")
 	if y == "" {
-		err := fmt.Errorf("Parameter y was empty")
+		err := fmt.Errorf("parameter y was empty")
 		span.SetTag("error", true)
 		h.Logger.For(ctx).Error(err.Error())
 		return nil, err
@@ -45,13 +45,13 @@ func (h *Handler) parseCoordinates(ctx context.Context, r *http.Request) (*tiles
 	yInt, err := strconv.ParseInt(y, 10, 32)
 	if err != nil {
 		span.SetTag("error", true)
-		h.Logger.For(ctx).Error("Error parsing y", zap.Error(err))
+		h.Logger.For(ctx).Error("error parsing y", zap.Error(err))
 		return nil, err
 	}
 
 	z := r.URL.Query().Get("z")
 	if z == "" {
-		err := fmt.Errorf("Parameter z was empty")
+		err := fmt.Errorf("parameter z was empty")
 		span.SetTag("error", true)
 		h.Logger.For(ctx).Error(err.Error())
 		return nil, err
@@ -59,7 +59,7 @@ func (h *Handler) parseCoordinates(ctx context.Context, r *http.Request) (*tiles
 	zInt, err := strconv.ParseInt(z, 10, 32)
 	if err != nil {
 		span.SetTag("error", true)
-		h.Logger.For(ctx).Error("Error parsing z", zap.Error(err))
+		h.Logger.For(ctx).Error("error parsing z", zap.Error(err))
 		return nil, err
 	}
 

@@ -19,19 +19,15 @@ const (
 	geocodingProviderNotFoundError = "The environmentvariable 'GEOCODING_PROVIDER' must be set with 'nominatim'"
 )
 
-var (
-	serviceName       = "charon.srv.geocoding"
-	geocodingProvider string
-)
-
-func init() {
+func main() {
+	var (
+		serviceName       = "charon.srv.geocoding"
+		geocodingProvider string
+	)
 	geocodingProvider = os.Getenv("GEOCODING_PROVIDER")
 	if geocodingProvider != "" {
 		serviceName = serviceName + "." + geocodingProvider
 	}
-}
-
-func main() {
 	logger := log.NewDefaultLogger(serviceName)
 
 	tracer, closer := tracing.NewTracer(serviceName, logger)

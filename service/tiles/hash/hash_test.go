@@ -33,7 +33,7 @@ func TestHashRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := HashRequest(tt.args.ctx, tt.args.req); got != tt.want {
+			if got := Request(tt.args.ctx, tt.args.req); got != tt.want {
 				t.Errorf("HashRequest() = %v, want %v", got, tt.want)
 			}
 		})

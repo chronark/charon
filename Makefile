@@ -50,7 +50,9 @@ fmt:
 	go fmt ./...
 	go vet ./...
 	go mod tidy
-	golangci-lint run ./...
+	~/go/bin/golangci-lint run ./... -v
+	docker run --rm -i hadolint/hadolint < ./service/Dockerfile
+	docker run --rm -i hadolint/hadolint < ./service/rsyslog/Dockerfile
 
 init:
 	[ ! -f ./terraform ] && make get-terraform || true

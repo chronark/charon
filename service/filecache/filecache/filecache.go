@@ -30,7 +30,7 @@ type FileCache struct {
 func New(basepath string, logger log.Factory) (*FileCache, error) {
 
 	if basepath == "" {
-		return nil, fmt.Errorf("Basepath must not be empty")
+		return nil, fmt.Errorf("basepath must not be empty")
 	}
 	fc := &FileCache{
 		Basepath: basepath,

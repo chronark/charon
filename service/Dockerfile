@@ -21,5 +21,5 @@ ARG SERVICE
 
 WORKDIR /
 COPY --from=service_builder /${SERVICE} .
-CMD [./${SERVICE}]
+CMD ["./${SERVICE}"]
 

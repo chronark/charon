@@ -1,0 +1,74 @@
+name: CI
+
+on: push
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Hadolint
+        run: |
+          docker run --rm -i hadolint/hadolint < ./service/Dockerfile
+          docker run --rm -i hadolint/hadolint < ./service/rsyslog/Dockerfile
+
+      - name: fmt
+        run: go fmt ./...
+
+      - name: vet
+        run: go vet ./...
+
+      - name: golangci-lint
+        run: docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.23.6 golangci-lint run
+
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'fmt'
+
+  testing:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Unittests
+        run: go test -covermode=atomic ./...
+
+  building_services:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ["api", "filecache", "geocoding", "tiles"]
+    name: Build service
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build ${{ matrix.service}}
+        run: docker build -t chronark/charon-${{ matrix.service}} -f ./service/Dockerfile --build-arg SERVICE=${{ matrix.service}} .
+      
+  
+  building_rsyslog:
+    runs-on: ubuntu-latest
+    name: Build rsyslog
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build rsyslog
+        run: docker build -t chronark/rsyslog ./service/rsyslog

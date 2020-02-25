@@ -9,7 +9,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 )
 
-func HashRequest(ctx context.Context, req *tiles.Request) string {
+func Request(ctx context.Context, req *tiles.Request) string {
 	span, _ := opentracing.StartSpanFromContext(ctx, "hashRequest")
 	defer span.Finish()
 

@@ -1,7 +1,6 @@
 # Charon
 
-[![CodeFactor](https://www.codefactor.io/repository/github/chronark/charon/badge)](https://www.codefactor.io/repository/github/chronark/charon)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fchronark%2Fcharon.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fchronark%2Fcharon?ref=badge_shield)
+![CI](https://github.com/chronark/charon/workflows/CI/badge.svg)
 
 Backend services for caching and displaying geospatial data
 
