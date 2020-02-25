@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var serviceName = "charon.srv.filecache"
+const serviceName = "charon.srv.filecache"
 
 func main() {
 	logger := log.NewDefaultLogger(serviceName)

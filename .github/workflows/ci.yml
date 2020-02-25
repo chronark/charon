@@ -27,8 +27,8 @@ jobs:
       - name: vet
         run: go vet ./...
 
-      - name: Run golangci-lint
-        uses: actions-contrib/golangci-lint@v1
+      - name: golangci-lint
+        run: docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.23.6 golangci-lint run -v
 
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
