@@ -7,35 +7,34 @@ test:
 
 build: build-filecache build-api build-geocoding build-tiles build-rsyslog build-map
 
-build-map:
-	docker build -t chronark/atlas https://github.com/chronark/atlas.git
+
 build-rsyslog:
-	docker build -t chronark/rsyslog ./service/rsyslog
+	docker build -t chronark/charon.rsyslog ./service/rsyslog
 
 build-filecache:
 	docker build \
-	-t chronark/charon-service-filecache \
+	-t chronark/charon.srv.filecache \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=filecache \
 	.
 
 build-api:
 	docker build \
-	-t chronark/charon-api \
+	-t chronark/charon.srv.api \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=api \
 	.
 
 build-geocoding:
 	docker build \
-	-t chronark/charon-service-geocoding \
+	-t chronark/charon.srv.geocoding \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=geocoding \
 	.
 
 build-tiles:
 	docker build \
-	-t chronark/charon-service-tiles \
+	-t chronark/charon.srv.tiles \
 	-f ./service/Dockerfile \
 	--build-arg SERVICE=tiles \
 	.
