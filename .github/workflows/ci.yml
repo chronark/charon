@@ -28,8 +28,11 @@ jobs:
       - name: Run golangci-lint
         uses: actions-contrib/golangci-lint@v1
 
-      - name: terraform fmt
-        run: make init && ./terraform fmt
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'fmt'
 
   testing:
     runs-on: ubuntu-latest
