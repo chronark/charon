@@ -38,4 +38,4 @@ jobs:
           password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           registry: docker.pkg.github.com
           context: ./service/rsyslog/
-          dockerfile: ./Dockerfile
+          dockerfile: ./service/rsyslog/Dockerfile
