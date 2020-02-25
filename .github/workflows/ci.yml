@@ -24,7 +24,10 @@ jobs:
 
       - name: vet
         run: go vet ./...
-      
+
+      - name: Run golangci-lint
+        uses: actions-contrib/golangci-lint@v1
+
       - name: terraform fmt
         run: make init && ./terraform fmt
 
@@ -50,6 +53,14 @@ jobs:
     name: Build
     steps:
       - uses: actions/checkout@v1
-
-      - name: Build containers
-        run: make build
+      - name: Build api
+        run: docker build -t chronark/charon-api -f ./service/Dockerfile --build-arg SERVICE=api .
+      - name: Build filecache
+        run: docker build -t chronark/charon-filecache -f ./service/Dockerfile --build-arg SERVICE=filecache .
+      - name: Build geocoding
+        run: docker build -t chronark/charon-geocoding -f ./service/Dockerfile --build-arg SERVICE=geocoding .
+      - name: Build rsyslog
+        run: docker build -t chronark/charon-rsyslog -f ./service/Dockerfile --build-arg SERVICE=rsyslog .
+      - name: Build tiles
+        run: docker build -t chronark/charon-tiles -f ./service/Dockerfile --build-arg SERVICE=tiles .
+     
