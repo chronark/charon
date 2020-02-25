@@ -55,17 +55,12 @@ jobs:
 
   building:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ["api", "filecache", "geocodign", "rsyslog", "tiles"]
     name: Build
     steps:
       - uses: actions/checkout@v1
-      - name: Build api
-        run: docker build -t chronark/charon-api -f ./service/Dockerfile --build-arg SERVICE=api .
-      - name: Build filecache
-        run: docker build -t chronark/charon-filecache -f ./service/Dockerfile --build-arg SERVICE=filecache .
-      - name: Build geocoding
-        run: docker build -t chronark/charon-geocoding -f ./service/Dockerfile --build-arg SERVICE=geocoding .
-      - name: Build rsyslog
-        run: docker build -t chronark/charon-rsyslog -f ./service/Dockerfile --build-arg SERVICE=rsyslog .
-      - name: Build tiles
-        run: docker build -t chronark/charon-tiles -f ./service/Dockerfile --build-arg SERVICE=tiles .
+      - name: Build ${{ matrix.service}}
+        run: docker build -t chronark/charon-${{ matrix.service}} -f ./service/Dockerfile --build-arg SERVICE=${{ matrix.service}} .
      
