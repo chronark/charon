@@ -10,5 +10,5 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
-	go.uber.org/zap v1.13.0
+	go.uber.org/zap v1.14.0
 )
