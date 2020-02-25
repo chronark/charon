@@ -1,8 +1,6 @@
-FROM ubuntu:18.04
-RUN apt-get update \
-    && apt-get install rsyslog=8.32.0-1ubuntu4 -y --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
+FROM alpine:3.11
+RUN apk update \
+    && apk add rsyslog=8.1911.0-r1 --no-cache \
+    && rm -rf /var/cache/apk/*
 COPY ./rsyslog.conf /etc/rsyslog.conf
 ENTRYPOINT ["rsyslogd", "-n"]
