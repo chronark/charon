@@ -16,8 +16,10 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Hadolint Action
-        uses: brpaz/hadolint-action@v1.0.2
+      - name: Hadolint
+        run: |
+          docker run --rm -i hadolint/hadolint < ./service/Dockerfile
+          docker run --rm -i hadolint/hadolint < ./service/rsyslog/Dockerfile
 
       - name: fmt
         run: go fmt ./...
