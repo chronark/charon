@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ["api", "filecache", "geocodign", "rsyslog", "tiles"]
     name: publish
     steps:
       - uses: actions/checkout@v1
@@ -15,47 +18,9 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: chronark/charon/api
+          name: chronark/charon/${{ service }}
           username: ${{ github.actor }}
           password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           registry: docker.pkg.github.com
           dockerfile: ./service/Dockerfile
-          buildargs: SERVICE=api
-
-      - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: chronark/charon/filecache
-          username: ${{ github.actor }}
-          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          registry: docker.pkg.github.com
-          dockerfile: ./service/Dockerfile
-          buildargs: SERVICE=filecache
-
-      - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: chronark/charon/geocoding
-          username: ${{ github.actor }}
-          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          registry: docker.pkg.github.com
-          dockerfile: ./service/Dockerfile
-          buildargs: SERVICE=geocoding
-      - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: chronark/charon/rsyslog
-          username: ${{ github.actor }}
-          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          registry: docker.pkg.github.com
-          dockerfile: ./service/Dockerfile
-          buildargs: SERVICE=rsyslog
-      - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: chronark/charon/tiles
-          username: ${{ github.actor }}
-          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          registry: docker.pkg.github.com
-          dockerfile: ./service/Dockerfile
-          buildargs: SERVICE=tiles
+          buildargs: SERVICE=${{ service }}
