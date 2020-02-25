@@ -65,6 +65,7 @@ apply: plan
 	./terraform apply "tfplan"
 	
 update: 
+	git checkout master
 	git pull
 	make apply
 
