@@ -37,4 +37,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           registry: docker.pkg.github.com
+          context: ./service/rsyslog/
           dockerfile: ./Dockerfile
