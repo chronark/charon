@@ -52,7 +52,6 @@ func main() {
 		micro.WrapHandler(opentracingWrapper.NewHandlerWrapper(opentracing.GlobalTracer())),
 		micro.WrapClient(opentracingWrapper.NewClientWrapper(opentracing.GlobalTracer())),
 	)
-
 	nominatimHandler := &nominatim.Handler{
 		Logger: logger,
 		Client: geocoding.NewGeocodingService("charon.srv.geocoding.nominatim", service.Client()),
