@@ -13,7 +13,7 @@ jobs:
         service: ["api", "filecache", "geocoding", "tiles"]
     name: publish services
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
   
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     name: publish rsyslog
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:

@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
@@ -60,7 +60,7 @@ jobs:
         service: ["api", "filecache", "geocoding", "tiles"]
     name: Build service
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Build ${{ matrix.service}}
         run: docker build -t chronark/charon-${{ matrix.service}} -f ./service/Dockerfile --build-arg SERVICE=${{ matrix.service}} .
       
@@ -69,6 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build rsyslog
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Build rsyslog
         run: docker build -t chronark/rsyslog ./service/rsyslog
