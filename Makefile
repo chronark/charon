@@ -64,6 +64,11 @@ plan: init
 apply: plan
 	./terraform apply "tfplan"
 	
+update: 
+	git checkout master
+	git pull
+	make apply
+
 purge:
 	./terraform destroy -auto-approve ||true
 	docker rm -f $$(docker ps -aq) || true 
