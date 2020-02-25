@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: ["api", "filecache", "geocodign", "rsyslog", "tiles"]
+        service: ["api", "filecache", "geocoding", "rsyslog", "tiles"]
     name: publish
     steps:
       - uses: actions/checkout@v1
