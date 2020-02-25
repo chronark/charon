@@ -57,10 +57,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: ["api", "filecache", "geocoding", "rsyslog", "tiles"]
-    name: Build
+        service: ["api", "filecache", "geocoding", "tiles"]
+    name: Build services
     steps:
       - uses: actions/checkout@v1
       - name: Build ${{ matrix.service}}
         run: docker build -t chronark/charon-${{ matrix.service}} -f ./service/Dockerfile --build-arg SERVICE=${{ matrix.service}} .
+      - name: Build rsyslog
+        run: docker build -t chronark/rsyslog ./service/rsyslog
      

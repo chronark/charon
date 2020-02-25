@@ -6,12 +6,12 @@ on:
       - master
 
 jobs:
-  publish:
+  publish_services:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: ["api", "filecache", "geocoding", "rsyslog", "tiles"]
-    name: publish
+        service: ["api", "filecache", "geocoding", "tiles"]
+    name: publish services
     steps:
       - uses: actions/checkout@v1
   
@@ -24,3 +24,18 @@ jobs:
           registry: docker.pkg.github.com
           dockerfile: ./service/Dockerfile
           buildargs: SERVICE=${{ service }}
+
+  publish_rsyslog:
+    runs-on: ubuntu-latest
+    name: publish rsyslog
+    steps:
+      - uses: actions/checkout@v1
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: chronark/charon/rsyslog
+          username: ${{ github.actor }}
+          password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          registry: docker.pkg.github.com
+          dockerfile: ./service/Dockerfile
+          buildargs: SERVICE=rsyslog
