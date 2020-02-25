@@ -17,34 +17,34 @@ resource "docker_network" "global" {
 ###########################
 
 resource "docker_image" "api" {
-  name          = "chronark/charon/api:latest"
-  pull_triggers = ["chronark/charon/api:latest.sha256_digest"]
+  name          = "chronark/charon.srv.api:latest"
+  pull_triggers = ["chronark/charon.srv.api:latest.sha256_digest"]
 }
 
 resource "docker_image" "filecache" {
-  name          = "chronark/charon/filecache:latest"
-  pull_triggers = ["chronark/charon/filecache:latest.sha256_digest"]
+  name          = "chronark/charon.srv.filecache:latest"
+  pull_triggers = ["chronark/charon.srv.filecache:latest.sha256_digest"]
 }
 
 resource "docker_image" "tiles" {
-  name          = "chronark/charon/tiles:latest"
-  pull_triggers = ["chronark/charon/tiles:latest.sha256_digest"]
+  name          = "chronark/charon.srv.tiles:latest"
+  pull_triggers = ["chronark/charon.srv.tiles:latest.sha256_digest"]
 }
 
 
 resource "docker_image" "geocoding" {
-  name          = "chronark/charon/geocoding:latest"
-  pull_triggers = ["chronark/charon/geocoding:latest.sha256_digest"]
+  name          = "chronark/charon.srv.geocoding:latest"
+  pull_triggers = ["chronark/charon.srv.geocoding:latest.sha256_digest"]
 }
 
 resource "docker_image" "atlas" {
-  name          = "chronark/atlas/map:latest"
-  pull_triggers = ["chronark/atlas/map:latest.sha256_digest"]
+  name          = "chronark/atlas:latest"
+  pull_triggers = ["chronark/atlas:latest.sha256_digest"]
 }
 
 resource "docker_image" "rsyslog" {
-  name          = "chronark/charon/rsyslog:latest"
-  pull_triggers = ["chronark/charon/rsyslog:latest.sha256_digest"]
+  name          = "chronark/charon.rsyslog:latest"
+  pull_triggers = ["chronark/charon.rsyslog:latest.sha256_digest"]
 }
 
 ##########################
