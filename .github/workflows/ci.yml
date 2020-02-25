@@ -1,0 +1,55 @@
+name: CI
+
+on: push
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Hadolint Action
+        uses: brpaz/hadolint-action@v1.0.2
+
+      - name: fmt
+        run: go fmt ./...
+
+      - name: vet
+        run: go vet ./...
+      
+      - name: terraform fmt
+        run: make init && ./terraform fmt
+
+  testing:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Unittests
+        run: go test
+
+  building:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Build containers
+        run: make build
