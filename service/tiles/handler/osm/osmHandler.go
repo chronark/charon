@@ -30,10 +30,6 @@ func (h *Handler) Get(ctx context.Context, req *tiles.Request, res *tiles.Respon
 		zap.Int32("z", req.GetZ()),
 	)
 
-	
-
-
-
 	hashKey := hash.HashRequest(ctx, req)
 
 	fileCacheClient := filecache.NewFilecacheService("charon.srv.filecache", h.Client)

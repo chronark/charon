@@ -41,13 +41,9 @@ func (l logger) With(fields ...zapcore.Field) Logger {
 func NewDefaultLogger(serviceName string) Factory {
 	devLogger, _ := zap.NewDevelopment(zap.AddStacktrace(zapcore.FatalLevel))
 	zapLogger := devLogger.With(zap.String("service", serviceName))
-	return  Factory{logger: zapLogger}
+	return Factory{logger: zapLogger}
 }
-
 
 func NewEmptyLogger() Factory {
 	return NewFactory(zap.NewNop())
 }
-
-
-

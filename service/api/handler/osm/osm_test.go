@@ -3,25 +3,21 @@ package osm
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
-	"net/url"
 
-	"github.com/micro/go-micro/v2/client"
 	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/service/tiles/proto/tiles"
+	"github.com/micro/go-micro/v2/client"
 )
-
 
 func urlConstructor(parameters string) *url.URL {
 	url, _ := url.Parse("http://server/?" + parameters)
 	return url
 }
 
-
-
 func TestHandler_parseCoordinates(t *testing.T) {
-
 
 	type fields struct {
 		Logger log.Factory
@@ -66,10 +62,10 @@ func TestHandler_parseCoordinates(t *testing.T) {
 			args: args{
 				ctx: context.TODO(),
 				r: &http.Request{
-					URL:  urlConstructor("y=2&z=3"),
+					URL: urlConstructor("y=2&z=3"),
 				},
 			},
-			want: nil,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -81,10 +77,10 @@ func TestHandler_parseCoordinates(t *testing.T) {
 			args: args{
 				ctx: context.TODO(),
 				r: &http.Request{
-					URL:  urlConstructor("x=2&z=3"),
+					URL: urlConstructor("x=2&z=3"),
 				},
 			},
-			want: nil,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -96,10 +92,10 @@ func TestHandler_parseCoordinates(t *testing.T) {
 			args: args{
 				ctx: context.TODO(),
 				r: &http.Request{
-					URL:  urlConstructor("y=2&x=3"),
+					URL: urlConstructor("y=2&x=3"),
 				},
 			},
-			want: nil,
+			want:    nil,
 			wantErr: true,
 		},
 	}
