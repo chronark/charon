@@ -58,7 +58,7 @@ jobs:
     strategy:
       matrix:
         service: ["api", "filecache", "geocoding", "tiles"]
-    name: Build services
+    name: Build service
     steps:
       - uses: actions/checkout@v1
       - name: Build ${{ matrix.service}}
