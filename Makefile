@@ -112,15 +112,3 @@ proto:
 		./service/tiles/proto/tiles/tiles.proto
 
 
-update:
-	rm ./**/**/go.mod
-	rm ./**/**/go.sum
-	cd ./service/filecache && go clean && go mod init github.com/chronark/charon/service/filecache && go get
-	cd ../api && go clean && go mod init github.com/chronark/charon/service/api && go get
-	cd ../geocoding && go clean && go mod init github.com/chronark/charon/service/geocoding && go get
-	cd ../tiles && go clean && go mod init github.com/chronark/charon/service/tiles && go get
-
-
-	cd ../../client/geocoding && go mod init github.com/chronark/charon/client/geocoding && go get
-	cd ../tiles && go mod init github.com/chronark/charon/client/tiles && go get
-
