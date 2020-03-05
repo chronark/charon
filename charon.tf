@@ -232,6 +232,7 @@ resource "docker_container" "jaeger" {
   name  = "jaeger"
   image = "jaegertracing/all-in-one:latest"
   env   = ["COLLECTOR_ZIPKIN_HTTP_PORT=9411"]
+  restart = "always"
   ports {
     internal = 5775
     external = 5775
