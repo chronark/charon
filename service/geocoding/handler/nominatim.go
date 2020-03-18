@@ -121,7 +121,7 @@ func (h *Nominatim) Reverse(ctx context.Context, req *geocoding.Coordinates, res
 	if filecacheGetResponse.GetHit() {
 		res.Payload = filecacheGetResponse.File
 	} else {
-		parameters := []string{"format=geojson", "polygon_geojson=1", "zoom=3", "limit=1", fmt.Sprintf("lon=%f", req.GetLon()), fmt.Sprintf("lat=%f", req.GetLat())}
+		parameters := []string{"format=geojson", "polygon_geojson=1", "zoom=3", "limit=1","polygon_threshold=0.001", fmt.Sprintf("lon=%f", req.GetLon()), fmt.Sprintf("lat=%f", req.GetLat())}
 		url := "https://nominatim.openstreetmap.org/reverse?" + strings.Join(parameters, "&")
 
 		geojson, err := h.request(ctx, url)
