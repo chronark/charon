@@ -83,7 +83,7 @@ func (h *Nominatim) Forward(ctx context.Context, req *geocoding.Search, res *geo
 			zap.Bool("hit", false),
 			zap.String("hashKey", hashKey),
 		)
-		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=geojson", "polygon_geojson=1", "limit=1"}
+		parameters := []string{fmt.Sprintf("q=%s", req.Query), "format=geojson", "polygon_geojson=1", "limit=1", "polygon_threshold=0.001"}
 		url := "https://nominatim.openstreetmap.org/search?" + strings.Join(parameters, "&")
 		geojson, err := h.request(ctx, url)
 		if err != nil {
