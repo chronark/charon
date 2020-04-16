@@ -232,14 +232,6 @@ resource "docker_container" "portainer" {
 resource "docker_container" "datadog" {
   name  = "datadog"
   image = "datadog/agent:latest"
-  ports {
-    internal = 8000
-    external = 8000
-  }
-  ports {
-    internal = 9000
-    external = 9000
-  }
   volumes {
     host_path      = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
