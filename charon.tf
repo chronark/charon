@@ -228,6 +228,44 @@ resource "docker_container" "portainer" {
 
 }
 
+
+resource "docker_container" "datadog" {
+  name  = "datadog"
+  image = "datadog/agent:latest"
+  ports {
+    internal = 8000
+    external = 8000
+  }
+  ports {
+    internal = 9000
+    external = 9000
+  }
+  volumes {
+    host_path      = "/var/run/docker.sock"
+    container_path = "/var/run/docker.sock:ro"
+  }
+  volumes {
+    host_path      = "/proc/"
+    container_path = "/host/proc/:ro"
+  }
+  volumes {
+    host_path      = "sys/fs/cgroup/"
+    container_path = "/host/sys/fs/cgroup:ro"
+  }
+  env = [
+    "DD_API_KEY=b669ac0bf281a09329eb0abca82732e4",
+    "DD_APM_ENABLED=true",
+    "DD_LOGS_ENABLED=true",
+    
+  ]
+  
+  restart = "always"
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
+}
+
 resource "docker_container" "jaeger" {
   name    = "jaeger"
   image   = "jaegertracing/all-in-one:latest"
