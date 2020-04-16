@@ -242,7 +242,7 @@ resource "docker_container" "datadog" {
   }
   volumes {
     host_path      = "/var/run/docker.sock"
-    container_path = "/var/run/docker.sock:ro"
+    container_path = "/var/run/docker.sock"
   }
   volumes {
     host_path      = "/proc/"
@@ -250,7 +250,7 @@ resource "docker_container" "datadog" {
   }
   volumes {
     host_path      = "/sys/fs/cgroup/"
-    container_path = "/host/sys/fs/cgroup:ro"
+    container_path = "/host/sys/fs/cgroup"
   }
   env = [
     "DD_API_KEY=b669ac0bf281a09329eb0abca82732e4",
