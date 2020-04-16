@@ -249,7 +249,7 @@ resource "docker_container" "datadog" {
     container_path = "/host/proc/:ro"
   }
   volumes {
-    host_path      = "sys/fs/cgroup/"
+    host_path      = "/sys/fs/cgroup/"
     container_path = "/host/sys/fs/cgroup:ro"
   }
   env = [
