@@ -244,11 +244,15 @@ resource "docker_container" "datadog" {
     host_path      = "/sys/fs/cgroup/"
     container_path = "/host/sys/fs/cgroup"
   }
+  volumes {
+    host_path      = "/opt/datadog-agent/run"
+    container_path = "/opt/datadog-agent/run"
+  }
   env = [
     "DD_API_KEY=b669ac0bf281a09329eb0abca82732e4",
     "DD_APM_ENABLED=true",
     "DD_LOGS_ENABLED=true",
-    
+    "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true", 
   ]
   
   restart = "always"
