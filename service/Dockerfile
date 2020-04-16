@@ -1,4 +1,4 @@
-FROM golang:1.13 as service_builder
+FROM golang:1.14 as service_builder
 
 WORKDIR /charon
 

@@ -1,4 +1,4 @@
-FROM golang:1.13 as util_builder
+FROM golang:1.14 as util_builder
 WORKDIR /
 
 RUN git clone https://github.com/chronark/waitfor.git
@@ -10,7 +10,7 @@ ENV GOARCH amd64
 ENV CGO_ENABLED 0
 RUN go build -o waitfor .
 
-FROM golang:1.13 as service_builder
+FROM golang:1.14 as service_builder
 
 WORKDIR /charon
 
