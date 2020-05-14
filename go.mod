@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
-	github.com/golang/protobuf v1.3.3
+	github.com/golang/protobuf v1.4.2
 	github.com/micro/go-micro/v2 v2.1.2
 	github.com/micro/go-plugins/wrapper/trace/opentracing/v2 v2.0.2
 	github.com/moesif/moesifmiddleware-go v1.0.5
