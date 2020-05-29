@@ -25,7 +25,7 @@ ENV CGO_ENABLED 0
 RUN go build -o /tiles-service ./service/tiles
 
 
-FROM alpine:3.11
+FROM alpine:3.12
 
 WORKDIR /
 COPY --from=service_builder /tiles-service .

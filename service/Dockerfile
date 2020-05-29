@@ -16,7 +16,7 @@ ENV CGO_ENABLED 0
 RUN go build -o /${SERVICE} ./service/${SERVICE}
 
 
-FROM alpine:3.11
+FROM alpine:3.12
 ARG SERVICE
 
 WORKDIR /
