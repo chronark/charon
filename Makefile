@@ -1,6 +1,6 @@
 export PATH := $(shell go env GOPATH)/src:$(PATH)
 export PATH := $(shell go env GOPATH)/bin:$(PATH)
-
+export DOCKER_BUILDKIT := 1
 
 test:
 	go test -covermode=atomic ./...
@@ -43,6 +43,21 @@ build-clients:
 	docker build -t chronark/charon-client-geocoding ./client/geocoding
 	docker build -t chronark/charon-client-tiles ./client/tiles
 	
+
+
+build-map:
+	git clone https://github.com/chronark/atlas.git
+	docker build \
+	-t chronark/atlas:A \
+	--build-arg CHARON_URL=http://localhost \
+	--build-arg TEST_DISPLAY_ALWAYS=true \
+	./atlas/
+
+	docker build \
+	-t chronark/atlas:B \
+	--build-arg CHARON_URL=http://localhost \
+	./atlas/
+	rm -rf atlas
 	
 fmt:
 	./terraform fmt
