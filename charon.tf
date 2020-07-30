@@ -189,12 +189,31 @@ resource "docker_container" "logspout" {
 
 
 
-resource "docker_container" "atlas" {
-  name  = "atlas"
-  image = docker_image.atlas.latest
+resource "docker_container" "atlasA" {
+  name  = "atlasA"
+  image = "chronark/atlas:A"
   ports {
     internal = 80
-    external = 80
+    external = 50080
+  }
+  restart = "always"
+  # networks_advanced {
+  #   name = docker_network.data.name
+  # }
+  networks_advanced {
+    name = docker_network.global.name
+  }
+
+}
+
+
+
+resource "docker_container" "atlasB" {
+  name  = "atlasB"
+  image = "chronark/atlas:B"
+  ports {
+    internal = 80
+    external = 50081
   }
   restart = "always"
   # networks_advanced {
@@ -252,9 +271,9 @@ resource "docker_container" "datadog" {
     "DD_API_KEY=b669ac0bf281a09329eb0abca82732e4",
     "DD_APM_ENABLED=true",
     "DD_LOGS_ENABLED=true",
-    "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true", 
+    "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true",
   ]
-  
+
   restart = "always"
   networks_advanced {
     name = docker_network.global.name
