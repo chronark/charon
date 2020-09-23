@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	moesifmiddleware "github.com/moesif/moesifmiddleware-go"
 	"net/http"
 	"os"
-    moesifmiddleware "github.com/moesif/moesifmiddleware-go"
 
 	"github.com/chronark/charon/pkg/log"
 	"github.com/chronark/charon/pkg/tracing"
@@ -28,7 +28,7 @@ func corsWrapper(h http.Handler) http.Handler {
 	})
 }
 
-var moesifOptions = map[string]interface{} {
+var moesifOptions = map[string]interface{}{
 	"Application_Id": "eyJhcHAiOiI1NjU6MTU3IiwidmVyIjoiMi4wIiwib3JnIjoiMTc3OjIzNSIsImlhdCI6MTU4MzM2NjQwMH0.QrKoJrjmgevOhUfsnOuzmmiPLEbKnNWVW7Y7_BluaDQ",
 
 	// Set to false if you don't want to capture payloads
@@ -70,10 +70,10 @@ func main() {
 		Client: tiles.NewTilesService("charon.srv.tiles.osm", service.Client()),
 	}
 
-	api.Handle("/geocoding/forward/", moesifmiddleware.MoesifMiddleware(corsWrapper(http.HandlerFunc(nominatimHandler.Forward)), moesifOptions))
-	api.Handle("/geocoding/reverse/", moesifmiddleware.MoesifMiddleware(corsWrapper(http.HandlerFunc(nominatimHandler.Reverse)), moesifOptions))
+	api.Handle("/geocoding/forward/", moesifmiddleware.MoesifMiddleware(http.HandlerFunc(nominatimHandler.Forward), moesifOptions))
+	api.Handle("/geocoding/reverse/", moesifmiddleware.MoesifMiddleware(http.HandlerFunc(nominatimHandler.Reverse), moesifOptions))
 
-	api.Handle("/tile/", moesifmiddleware.MoesifMiddleware(corsWrapper(http.HandlerFunc(osmHandler.Get)), moesifOptions))
+	api.Handle("/tile/", moesifmiddleware.MoesifMiddleware(http.HandlerFunc(osmHandler.Get), moesifOptions))
 
 	if err := api.Init(); err != nil {
 		logger.For(ctx).Fatal(err.Error())
