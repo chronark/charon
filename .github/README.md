@@ -31,7 +31,7 @@ There are a couple of steps to run the services.
     cd charon
     ```
 
-1. Build all necessary docker images if you don't have them alrady.
+1. Build all necessary docker images if you don't have them already.
 
     ```sh
     make build
