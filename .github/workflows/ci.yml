@@ -16,11 +16,6 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Hadolint
-        run: |
-          docker run --rm -i hadolint/hadolint < ./service/Dockerfile
-          docker run --rm -i hadolint/hadolint < ./service/rsyslog/Dockerfile
-
       - name: fmt
         run: go fmt ./...
 
