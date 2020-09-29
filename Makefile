@@ -81,6 +81,11 @@ apply: plan
 update: 
 	git checkout master
 	git pull
+
+	# While running our A/B tests we need to manually build two map versions
+	# If you remove this step the atlas image will be pulled from the registry and a single map instance will be running.
+	make build-map
+
 	make apply
 
 purge:
